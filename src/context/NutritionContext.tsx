@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { DailyLog, MealRecord, UserSettings } from '../types';
 import { getDailyLog, addMealToLog, getTodayDateString } from '../storage/localStore';
 

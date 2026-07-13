@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export interface UserProfile {
   name: string;
@@ -18,7 +18,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false); // No longer checking storage, so not loading
 
   const login = (userProfile?: UserProfile) => {
     setIsAuthenticated(true);
@@ -33,10 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false);
     setUser(null);
   };
-
-  if (loading) {
-    return <div className="min-h-screen bg-brand-bg flex items-center justify-center">Loading...</div>;
-  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>

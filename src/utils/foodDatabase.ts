@@ -1,0 +1,28 @@
+import { Food } from '../types';
+
+export const FOOD_DATABASE: Food[] = [
+  { id: '1', name: 'Egg', calories: 72, protein: 6, carbs: 0.6, fat: 5, unit: 'pieces', baseQuantity: 1 },
+  { id: '2', name: 'Egg White', calories: 17, protein: 3.6, carbs: 0.2, fat: 0.1, unit: 'pieces', baseQuantity: 1 },
+  { id: '3', name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, unit: 'grams', baseQuantity: 100 },
+  { id: '4', name: 'Chicken Tandoori', calories: 150, protein: 25, carbs: 2, fat: 4.5, unit: 'grams', baseQuantity: 100 },
+  { id: '5', name: 'Fish (Rohu)', calories: 97, protein: 16.4, carbs: 0, fat: 2.3, unit: 'grams', baseQuantity: 100 },
+  { id: '6', name: 'Prawns', calories: 99, protein: 24, carbs: 0.2, fat: 0.3, unit: 'grams', baseQuantity: 100 },
+  { id: '7', name: 'Rice (White)', calories: 130, protein: 2.7, carbs: 28, fat: 0.3, unit: 'grams', baseQuantity: 100 },
+  { id: '8', name: 'Brown Rice', calories: 111, protein: 2.6, carbs: 23, fat: 0.9, unit: 'grams', baseQuantity: 100 },
+  { id: '9', name: 'Dal (Cooked)', calories: 116, protein: 9, carbs: 20, fat: 0.4, unit: 'bowls', baseQuantity: 1 },
+  { id: '10', name: 'Sambar', calories: 140, protein: 6, carbs: 22, fat: 4, unit: 'bowls', baseQuantity: 1 },
+  { id: '11', name: 'Luchi', calories: 150, protein: 3, carbs: 18, fat: 7, unit: 'pieces', baseQuantity: 1 },
+  { id: '12', name: 'Muri (Puffed Rice)', calories: 402, protein: 6, carbs: 90, fat: 0.5, unit: 'grams', baseQuantity: 100 },
+  { id: '13', name: 'Roti', calories: 120, protein: 4, carbs: 22, fat: 1.5, unit: 'pieces', baseQuantity: 1 },
+  { id: '14', name: 'Paneer', calories: 296, protein: 14, carbs: 3.4, fat: 25, unit: 'grams', baseQuantity: 100 },
+  { id: '15', name: 'Banana', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, unit: 'pieces', baseQuantity: 1 },
+  { id: '16', name: 'Apple', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, unit: 'pieces', baseQuantity: 1 },
+  { id: '17', name: 'Greek Yogurt', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, unit: 'grams', baseQuantity: 100 },
+  { id: '18', name: 'Protein Bar', calories: 200, protein: 20, carbs: 22, fat: 6, unit: 'pieces', baseQuantity: 1 },
+  { id: '19', name: 'Snickers', calories: 250, protein: 4, carbs: 33, fat: 12, unit: 'pieces', baseQuantity: 1 },
+  { id: '20', name: 'Dairy Milk', calories: 530, protein: 7.3, carbs: 58, fat: 30.5, unit: 'grams', baseQuantity: 100 },
+  { id: '21', name: 'Tea (with milk/sugar)', calories: 45, protein: 1, carbs: 8, fat: 1, unit: 'cups', baseQuantity: 1 },
+  { id: '22', name: 'Coffee (with milk/sugar)', calories: 50, protein: 1, carbs: 9, fat: 1, unit: 'cups', baseQuantity: 1 },
+  { id: '23', name: 'Milk (Whole)', calories: 61, protein: 3.2, carbs: 4.8, fat: 3.3, unit: 'grams', baseQuantity: 100 },
+  { id: '24', name: 'Oats (Raw)', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9, unit: 'grams', baseQuantity: 100 },
+];

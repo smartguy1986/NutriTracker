@@ -1,37 +1,61 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeftIcon, ChevronRightIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { FOOD_DATABASE } from '../utils/foodDatabase';
+import { ChevronLeftIcon, CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useNutrition } from '../context/NutritionContext';
-import { Food, MealType } from '../types';
-
-const MEAL_CATEGORIES: { id: MealType; label: string; icon: string; time: string }[] = [
-  { id: "Breakfast", label: "Breakfast", icon: "🌅", time: "7:00 – 9:00 AM" },
-  { id: "Lunch", label: "Lunch", icon: "☀️", time: "12:00 – 2:00 PM" },
-  { id: "Snack", label: "Snacks", icon: "🍎", time: "3:00 – 4:00 PM" },
-  { id: "Dinner", label: "Dinner", icon: "🌙", time: "7:00 – 9:00 PM" },
-];
+import { Food } from '../types';
 
 export function AddMeal() {
   const navigate = useNavigate();
   const { addMeal } = useNutrition();
 
-  const [step, setStep] = useState<"category" | "food" | "quantity">("category");
-  const [selectedCat, setSelectedCat] = useState<MealType | null>(null);
+  const [step, setStep] = useState<"food" | "quantity">("food");
   const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState<Food[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedFood, setSelectedFood] = useState<Food | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const filtered = FOOD_DATABASE.filter((f) => f.name.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    if (search.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(search)}&search_simple=1&action=process&json=1&page_size=15`);
+        const data = await res.json();
+        
+        const products = data.products
+          .filter((p: any) => p.product_name && p.nutriments && p.nutriments['energy-kcal_100g'])
+          .map((p: any) => ({
+            id: p.code,
+            name: p.product_name,
+            calories: p.nutriments['energy-kcal_100g'],
+            protein: p.nutriments['proteins_100g'] || 0,
+            carbs: p.nutriments['carbohydrates_100g'] || 0,
+            fat: p.nutriments['fat_100g'] || 0,
+            unit: '100g'
+          }));
+        setSearchResults(products);
+      } catch (e) {
+        console.error("Failed to fetch from OpenFoodFacts", e);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleConfirm = () => {
-    if (!selectedFood || !selectedCat) return;
+    if (!selectedFood) return;
     addMeal({
       id: crypto.randomUUID(),
       foodId: selectedFood.id,
       foodName: selectedFood.name,
-      mealType: selectedCat,
       quantity,
       unit: selectedFood.unit,
       calories: Math.round(selectedFood.calories * quantity),
@@ -48,7 +72,7 @@ export function AddMeal() {
     <div className="font-sans pb-32 min-h-screen bg-brand-bg text-brand-text">
       <div style={{ padding: "52px 20px 20px", background: "#0f1320" }} className="max-w-md mx-auto">
         <div className="flex items-center gap-4 mb-4">
-            {step === "category" ? (
+            {step === "food" ? (
                 <button onClick={() => navigate('/')} className="text-brand-gray">
                     <ChevronLeftIcon className="w-6 h-6" />
                 </button>
@@ -56,63 +80,46 @@ export function AddMeal() {
             <h2 style={{ color: "#f0f2f5", fontSize: 22, fontWeight: 800 }}>Log Food</h2>
         </div>
         <p style={{ color: "#6b7585", fontSize: 13 }}>
-          {step === "category" ? "Choose a meal category" : step === "food" ? `Adding to ${selectedCat}` : `Set quantity for ${selectedFood?.name}`}
+          {step === "food" ? `Search for a food item` : `Set quantity for ${selectedFood?.name}`}
         </p>
-        {step !== "category" && (
-          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            {["category", "food", "quantity"].map((s, i) => (
-              <div key={s} style={{
-                height: 3, borderRadius: 4, flex: 1,
-                background: ["category", "food", "quantity"].indexOf(step) >= i ? "#4ade80" : "#1e2230",
-                transition: "background 0.3s",
-              }} />
-            ))}
-          </div>
-        )}
+        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+          {["food", "quantity"].map((s, i) => (
+            <div key={s} style={{
+              height: 3, borderRadius: 4, flex: 1,
+              background: ["food", "quantity"].indexOf(step) >= i ? "#4ade80" : "#1e2230",
+              transition: "background 0.3s",
+            }} />
+          ))}
+        </div>
       </div>
 
       <div style={{ padding: "20px" }} className="max-w-md mx-auto">
-        {step === "category" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {MEAL_CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => { setSelectedCat(cat.id); setStep("food"); }}
-                style={{
-                  background: "#161921", borderRadius: 18, padding: "18px 20px",
-                  display: "flex", alignItems: "center", gap: 16, border: "none", cursor: "pointer", textAlign: "left", width: "100%",
-                }}
-              >
-                <span style={{ fontSize: 30 }}>{cat.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 15 }}>{cat.label}</p>
-                  <p style={{ color: "#6b7585", fontSize: 12 }}>{cat.time}</p>
-                </div>
-                <ChevronRightIcon className="w-5 h-5 text-brand-gray" />
-              </button>
-            ))}
-          </div>
-        )}
-
         {step === "food" && (
           <div>
-            <button onClick={() => setStep("category")} style={{ display: "flex", alignItems: "center", gap: 6, color: "#6b7585", background: "none", border: "none", cursor: "pointer", marginBottom: 16 }}>
-              <ChevronLeftIcon className="w-4 h-4" /> Back
-            </button>
-            <div style={{ position: "relative", marginBottom: 16 }}>
+            <div style={{ position: "relative" }}>
+              <MagnifyingGlassIcon className="w-5 h-5 text-brand-gray absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
+                placeholder="Search millions of foods..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search foods..."
                 style={{
-                  width: "100%", background: "#1e2230", borderRadius: 12, border: "1.5px solid rgba(255,255,255,0.08)",
-                  color: "#f0f2f5", fontSize: 14, padding: "14px 16px", outline: "none", boxSizing: "border-box",
+                  width: "100%", padding: "16px 16px 16px 44px", borderRadius: 14,
+                  background: "#161921", border: "1px solid #1e2230", color: "white", outline: "none",
+                  fontSize: 15
                 }}
               />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {filtered.map((food) => (
+
+            <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
+              {isSearching ? (
+                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>Searching database...</p>
+              ) : search.length > 0 && search.length < 3 ? (
+                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>Type at least 3 characters...</p>
+              ) : searchResults.length === 0 && search.length >= 3 ? (
+                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>No foods found.</p>
+              ) : (
+                searchResults.map(food => (
                 <button
                   key={food.id}
                   onClick={() => { setSelectedFood(food); setStep("quantity"); }}
@@ -133,7 +140,7 @@ export function AddMeal() {
                     <p style={{ color: "#6b7585", fontSize: 10 }}>per {food.baseQuantity}{food.unit}</p>
                   </div>
                 </button>
-              ))}
+              )))}
             </div>
           </div>
         )}
@@ -145,7 +152,7 @@ export function AddMeal() {
             </button>
 
             <div style={{ background: "#161921", borderRadius: 20, padding: 24, marginBottom: 24 }}>
-              <p style={{ color: "#4ade80", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>{selectedCat}</p>
+              <p style={{ color: "#4ade80", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Log Item</p>
               <h3 style={{ color: "#f0f2f5", fontSize: 22, fontWeight: 800, marginBottom: 4 }}>{selectedFood.name}</h3>
               <p style={{ color: "#6b7585", fontSize: 13 }}>per {selectedFood.baseQuantity}{selectedFood.unit}</p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 20 }}>
@@ -192,14 +199,14 @@ export function AddMeal() {
                 color: "#0d1a0f", fontWeight: 700, fontSize: 16, border: "none", cursor: "pointer",
               }}
             >
-              Add to {selectedCat} →
+              Log food →
             </button>
           </div>
         )}
       </div>
 
       {/* Confirmation Modal */}
-      {showConfirm && selectedFood && selectedCat && (
+      {showConfirm && selectedFood && (
         <div style={{
           position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 200,
           display: "flex", alignItems: "flex-end", justifyContent: "center",
@@ -215,7 +222,7 @@ export function AddMeal() {
                 <CheckIcon className="w-8 h-8 text-brand-green stroke-[3px]" />
               </div>
               <h3 style={{ color: "#f0f2f5", fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Confirm Food Log</h3>
-              <p style={{ color: "#6b7585", fontSize: 14 }}>Adding to your {selectedCat}</p>
+              <p style={{ color: "#6b7585", fontSize: 14 }}>Adding to your daily timeline</p>
             </div>
 
             <div style={{ background: "#161921", borderRadius: 16, padding: 20, marginBottom: 24 }}>

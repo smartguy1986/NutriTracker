@@ -1,5 +1,4 @@
-export type MealType = 'Breakfast' | 'Lunch' | 'Snack' | 'Dinner' | 'Post Workout';
-export type UnitType = 'grams' | 'pieces' | 'bowls' | 'cups';
+export type UnitType = 'grams' | 'pieces' | 'bowls' | 'cups' | 'ml' | 'oz';
 
 export interface Food {
   id: string;
@@ -16,7 +15,6 @@ export interface MealRecord {
   id: string;
   foodId: string;
   foodName: string;
-  mealType: MealType;
   quantity: number;
   unit: UnitType;
   calories: number;

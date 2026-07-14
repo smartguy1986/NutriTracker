@@ -2,21 +2,12 @@ import { BellIcon, FireIcon, BeakerIcon } from '@heroicons/react/24/outline';
 import { CircularProgress } from '../components/CircularProgress';
 import { BottomNav } from '../components/BottomNav';
 import { useNutrition } from '../context/NutritionContext';
-import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
-
-const MEAL_CATEGORIES = [
-  { id: "Breakfast", label: "Breakfast", icon: "🌅" },
-  { id: "Lunch", label: "Lunch", icon: "☀️" },
-  { id: "Snack", label: "Snacks", icon: "🍎" },
-  { id: "Dinner", label: "Dinner", icon: "🌙" },
-];
 
 export function Home() {
   const { dailyLog, settings } = useNutrition();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const remaining = settings.calorieGoal - dailyLog.totalCalories;
   const pctCal = Math.min(dailyLog.totalCalories / settings.calorieGoal, 1);
@@ -27,11 +18,8 @@ export function Home() {
     { label: "Fat", value: dailyLog.totalFat, goal: settings.fatGoal, color: "#f472b6", unit: "g" },
   ];
 
-  const todayMeals = MEAL_CATEGORIES.map((cat) => {
-    const items = dailyLog.meals.filter((m) => m.mealType === cat.id);
-    const cal = items.reduce((a, m) => a + m.calories, 0);
-    return { ...cat, items, cal };
-  }).filter((c) => c.items.length > 0);
+  // Sort meals chronologically (latest first or oldest first? timeline usually newest top)
+  const timelineMeals = [...dailyLog.meals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
     <div className="font-sans pb-32 bg-brand-bg min-h-screen text-brand-text">
@@ -124,38 +112,51 @@ export function Home() {
           </div>
         </div>
 
-        {/* Today's meals */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>Today's Meals</p>
-          <button style={{ fontSize: 12, color: "#4ade80", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>
-            See all →
-          </button>
+        {/* Today's meals timeline */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600 }}>Timeline</p>
         </div>
 
-        {todayMeals.length === 0 ? (
+        {timelineMeals.length === 0 ? (
           <div style={{ background: "#161921", borderRadius: 16, padding: 24, textAlign: "center" }}>
-            <p style={{ color: "#6b7585", fontSize: 14 }}>No meals logged today</p>
-            <button onClick={() => navigate('/add-meal')} style={{ marginTop: 12, color: "#4ade80", background: "rgba(74,222,128,0.1)", border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-              + Log a meal
-            </button>
+            <p style={{ color: "#6b7585", fontSize: 14 }}>Nothing logged yet today</p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {todayMeals.map((cat) => (
-              <div key={cat.id} style={{ background: "#161921", borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ fontSize: 24 }}>{cat.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 14 }}>{cat.label}</p>
-                  <p style={{ color: "#6b7585", fontSize: 12 }}>{cat.items.length} items</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative" }}>
+            {/* Timeline line */}
+            <div style={{ position: "absolute", left: 19, top: 20, bottom: 20, width: 2, background: "#1e2230" }} />
+            
+            {timelineMeals.map((meal) => {
+              const timeStr = new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return (
+                <div key={meal.id} style={{ display: "flex", gap: 16, position: "relative", zIndex: 1 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 20, background: "#1a1e28", border: "2px solid #0d0f14", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ fontSize: 16 }}>🍔</span>
+                  </div>
+                  <div style={{ flex: 1, background: "#161921", borderRadius: 16, padding: "14px 16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                      <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 15 }}>{meal.foodName}</p>
+                      <span style={{ color: "#6b7585", fontSize: 11 }}>{timeStr}</span>
+                    </div>
+                    <p style={{ color: "#6b7585", fontSize: 13, marginBottom: 8 }}>{meal.quantity} {meal.unit}</p>
+                    <div style={{ display: "flex", gap: 12 }}>
+                      <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 14 }} className="font-mono">
+                        {Math.round(meal.calories)} <span style={{ fontSize: 10, color: "#6b7585", fontWeight: 400, fontFamily: "Plus Jakarta Sans" }}>kcal</span>
+                      </p>
+                      <p style={{ color: "#60a5fa", fontWeight: 800, fontSize: 14 }} className="font-mono">
+                        {Math.round(meal.protein)} <span style={{ fontSize: 10, color: "#6b7585", fontWeight: 400, fontFamily: "Plus Jakarta Sans" }}>g pro</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 16 }} className="font-mono">
-                  {Math.round(cat.cal)} <span style={{ fontSize: 11, color: "#6b7585", fontWeight: 400, fontFamily: "Plus Jakarta Sans" }}>kcal</span>
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
+
+
       <BottomNav />
     </div>
   );

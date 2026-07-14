@@ -6,6 +6,7 @@ interface NutritionContextType {
   dailyLog: DailyLog;
   settings: UserSettings;
   addMeal: (meal: MealRecord) => void;
+  updateSettings: (settings: UserSettings) => void;
 }
 
 const defaultSettings: UserSettings = {
@@ -21,16 +22,23 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
   const today = getTodayDateString();
   const [dailyLog, setDailyLog] = useState<DailyLog>(() => getDailyLog(today));
   
-  // We can also load settings from local storage in the future
-  const [settings] = useState<UserSettings>(defaultSettings);
+  const [settings, setSettings] = useState<UserSettings>(() => {
+    const saved = localStorage.getItem('user_settings');
+    return saved ? JSON.parse(saved) : defaultSettings;
+  });
 
   const addMeal = (meal: MealRecord) => {
     const updatedLog = addMealToLog(today, meal);
     setDailyLog({ ...updatedLog }); // Trigger re-render
   };
 
+  const updateSettings = (newSettings: UserSettings) => {
+    setSettings(newSettings);
+    localStorage.setItem('user_settings', JSON.stringify(newSettings));
+  };
+
   return (
-    <NutritionContext.Provider value={{ dailyLog, settings, addMeal }}>
+    <NutritionContext.Provider value={{ dailyLog, settings, addMeal, updateSettings }}>
       {children}
     </NutritionContext.Provider>
   );

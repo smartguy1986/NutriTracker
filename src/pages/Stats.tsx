@@ -12,13 +12,6 @@ const WEEK_DATA = [
   { day: "Sun", calories: 783 },
 ];
 
-const MEAL_CATEGORIES = [
-  { id: "Breakfast", label: "Breakfast", icon: "🌅", time: "7:00 – 9:00 AM" },
-  { id: "Lunch", label: "Lunch", icon: "☀️", time: "12:00 – 2:00 PM" },
-  { id: "Snack", label: "Snacks", icon: "🍎", time: "3:00 – 4:00 PM" },
-  { id: "Dinner", label: "Dinner", icon: "🌙", time: "7:00 – 9:00 PM" },
-];
-
 export function Stats() {
   const { dailyLog } = useNutrition();
 
@@ -28,12 +21,7 @@ export function Stats() {
     { name: "Fat", value: Math.round(dailyLog.totalFat), color: "#f472b6" },
   ];
 
-  const mealBreakdown = MEAL_CATEGORIES.map((cat) => {
-    const items = dailyLog.meals.filter((m) => m.mealType === cat.id);
-    const cal = items.reduce((a, m) => a + m.calories, 0);
-    const prot = items.reduce((a, m) => a + m.protein, 0);
-    return { ...cat, items, cal, prot };
-  });
+  const sortedMeals = [...dailyLog.meals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
   return (
     <div className="font-sans pb-32 bg-brand-bg min-h-screen text-brand-text">
@@ -83,37 +71,37 @@ export function Stats() {
           </div>
         </div>
 
-        {/* Meal-by-meal */}
-        <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 12 }}>Meal Breakdown</p>
+        {/* Logged Items */}
+        <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 12 }}>Logged Items</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {mealBreakdown.map((cat) => (
-            <div key={cat.id} style={{ background: "#161921", borderRadius: 18, overflow: "hidden" }}>
-              <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ fontSize: 24 }}>{cat.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 15 }}>{cat.label}</p>
-                  <p style={{ color: "#6b7585", fontSize: 12 }}>{cat.time}</p>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <p style={{ color: cat.cal > 0 ? "#4ade80" : "#6b7585", fontWeight: 800, fontSize: 16 }} className="font-mono">
-                    {Math.round(cat.cal)} <span style={{ fontSize: 11, color: "#6b7585", fontWeight: 400, fontFamily: "Plus Jakarta Sans" }}>kcal</span>
-                  </p>
-                  <p style={{ color: "#6b7585", fontSize: 11 }}>{cat.items.length} items</p>
-                </div>
-              </div>
-              {cat.items.length > 0 && (
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "12px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
-                  {cat.items.map((item) => (
-                    <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", flexShrink: 0 }} />
-                      <p style={{ flex: 1, color: "#a8b0c0", fontSize: 13 }}>{item.foodName} <span style={{ color: "#6b7585" }}>× {item.quantity}</span></p>
-                      <p style={{ color: "#6b7585", fontSize: 12 }} className="font-mono">{Math.round(item.calories)} kcal</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {sortedMeals.length === 0 ? (
+            <div style={{ background: "#161921", borderRadius: 16, padding: 24, textAlign: "center" }}>
+              <p style={{ color: "#6b7585", fontSize: 14 }}>No logs for today</p>
             </div>
-          ))}
+          ) : (
+            sortedMeals.map((meal) => {
+              const timeStr = new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return (
+                <div key={meal.id} style={{ background: "#161921", borderRadius: 18, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 15 }}>{meal.foodName}</p>
+                    <p style={{ color: "#6b7585", fontSize: 12, marginTop: 2 }}>{timeStr} · {meal.quantity} {meal.unit}</p>
+                    <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+                      <span style={{ fontSize: 11, color: "#60a5fa" }} className="font-mono">{Math.round(meal.protein)}g P</span>
+                      <span style={{ fontSize: 11, color: "#fb923c" }} className="font-mono">{Math.round(meal.carbs)}g C</span>
+                      <span style={{ fontSize: 11, color: "#f472b6" }} className="font-mono">{Math.round(meal.fat)}g F</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 18 }} className="font-mono">
+                      {Math.round(meal.calories)}
+                    </p>
+                    <p style={{ color: "#6b7585", fontSize: 11 }}>kcal</p>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
       <BottomNav />

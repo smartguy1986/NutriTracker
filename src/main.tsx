@@ -6,6 +6,7 @@ import App from './App.tsx'
 import './index.css'
 import { NutritionProvider } from './context/NutritionContext'
 import { AuthProvider } from './context/AuthContext'
+import { FoodDatabaseProvider } from './context/FoodDatabaseContext'
 
 const queryClient = new QueryClient()
 
@@ -14,9 +15,11 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <NutritionProvider>
-            <App />
-          </NutritionProvider>
+          <FoodDatabaseProvider>
+            <NutritionProvider>
+              <App />
+            </NutritionProvider>
+          </FoodDatabaseProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

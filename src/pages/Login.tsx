@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { FireIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -11,18 +11,8 @@ declare global {
 }
 
 export function Login() {
-  const [phone, setPhone] = useState("");
-  const [focused, setFocused] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
-
-  const valid = phone.replace(/\D/g, "").length >= 10;
-
-  const handlePhoneSubmit = () => {
-    if (valid) {
-      navigate('/verify-otp', { state: { phone } });
-    }
-  };
 
   useEffect(() => {
     // Initialize Google Sign-In when the script loads
@@ -76,6 +66,32 @@ export function Login() {
     }
   };
 
+  const handleTruecallerLogin = () => {
+    // 1. Generate a unique request ID
+    const requestNonce = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    
+    // Save nonce to session storage to verify callback later (if needed by frontend polling)
+    sessionStorage.setItem('tc_nonce', requestNonce);
+
+    // 2. Construct the deep link
+    const appKey = "y22al892a7e025a814b0593e8a0ab6597ca1a";
+    const appName = "NutriTrack";
+    const deepLink = `truecallersdk://truesdk/web_verify?type=btmsheet&requestNonce=${requestNonce}&partnerKey=${appKey}&partnerName=${encodeURIComponent(appName)}&lang=en`;
+
+    // 3. Try to open the Truecaller app
+    window.location.href = deepLink;
+
+    // 4. Fallback if Truecaller is not installed
+    setTimeout(() => {
+      if (document.hasFocus()) {
+        console.log("Truecaller app not detected or user cancelled.");
+        // In a real app, you might want to show a toast or message here
+      }
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col font-sans">
       <div className="flex-1 flex flex-col justify-center px-6 pt-16 pb-8 max-w-md mx-auto w-full">
@@ -84,50 +100,27 @@ export function Login() {
             <FireIcon className="w-7 h-7 text-brand-green" />
           </div>
           <h1 className="text-3xl font-extrabold text-brand-text mb-2">Track your<br />nutrition.</h1>
-          <p className="text-brand-gray text-sm">Enter your phone number to get started with your personalized calorie journey.</p>
+          <p className="text-brand-gray text-sm">Sign in to get started with your personalized calorie journey.</p>
         </div>
 
         <div className="space-y-6">
-          <div>
-            <label className="text-xs font-semibold text-brand-gray tracking-widest uppercase mb-3 block">Phone Number</label>
-            <div
-              style={{
-                display: "flex", alignItems: "center", background: "#1e2230",
-                borderRadius: 14, border: `1.5px solid ${focused ? "#4ade80" : "rgba(255,255,255,0.08)"}`,
-                transition: "border-color 0.2s", padding: "0 16px",
-              }}
-            >
-              <span style={{ color: "#6b7585", fontSize: 15, marginRight: 8, fontWeight: 500 }}>+91</span>
-              <div style={{ width: 1, height: 20, background: "rgba(255,255,255,0.1)", marginRight: 12 }} />
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                placeholder="98765 43210"
-                maxLength={15}
-                style={{
-                  flex: 1, background: "none", border: "none", outline: "none",
-                  color: "#f0f2f5", fontSize: 17, padding: "16px 0", letterSpacing: 1,
-                }}
-                className="font-mono"
-              />
-            </div>
-          </div>
-
+          
           <button
-            onClick={handlePhoneSubmit}
-            disabled={!valid}
+            onClick={handleTruecallerLogin}
             style={{
               width: "100%", padding: "16px", borderRadius: 14,
-              background: valid ? "#4ade80" : "#1e2230",
-              color: valid ? "#0d1a0f" : "#6b7585",
-              fontWeight: 700, fontSize: 16, border: "none", cursor: valid ? "pointer" : "default",
-              transition: "all 0.2s",
+              background: "#0087FF", // Truecaller Blue
+              color: "#ffffff",
+              fontWeight: 700, fontSize: 16, border: "none", cursor: "pointer",
+              transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px"
             }}
+            className="active:scale-95 shadow-[0_4px_16px_rgba(0,135,255,0.3)]"
           >
-            Continue →
+            {/* Minimal Truecaller icon representation */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.12 16.48C19.12 16.48 20.36 17.5 21.05 18.2C21.74 18.9 22.37 19.86 21.93 20.91C21.49 21.96 20.21 22.18 19.13 22.04C16.49 21.7 8.35 18.66 4.3 12.56C2.33 9.61 1.7 6.47 2.05 4.3C2.22 3.16 2.89 1.63 4.14 1.73C5.12 1.81 6.07 2.76 6.8 3.51C7.8 4.54 8.76 5.56 8.76 5.56C9.28 6.08 9.29 6.88 8.73 7.42C8.73 7.42 7.74 8.44 7.21 9C6.83 9.4 6.78 9.94 7.03 10.37C8.18 12.35 9.77 13.98 11.66 15.15C12.08 15.41 12.61 15.36 12.99 14.98C13.56 14.41 14.54 13.43 14.54 13.43C15.09 12.87 15.89 12.88 16.41 13.41C16.41 13.41 17.7 14.77 19.12 16.48Z" fill="white"/>
+            </svg>
+            Verify with Truecaller
           </button>
 
           <div className="flex items-center gap-4 my-6">

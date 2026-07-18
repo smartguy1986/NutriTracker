@@ -91,7 +91,7 @@ export function Login() {
           
           <a
             href={deepLink}
-            onClick={(e) => {
+            onClick={() => {
               sessionStorage.setItem('tc_nonce', requestNonce);
               // Fallback if Truecaller is not installed
               setTimeout(() => {

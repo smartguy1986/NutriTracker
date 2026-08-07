@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FireIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,8 @@ declare global {
 export function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize Google Sign-In when the script loads
@@ -89,14 +91,21 @@ export function Login() {
 
         <div className="space-y-6">
           
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-4 rounded-xl text-center">
+              {error}
+            </div>
+          )}
+
           <a
             href={deepLink}
             onClick={() => {
+              setError(null);
               sessionStorage.setItem('tc_nonce', requestNonce);
               // Fallback if Truecaller is not installed
               setTimeout(() => {
                 if (document.hasFocus()) {
-                  console.log("Truecaller app not detected or user cancelled.");
+                  setError("Truecaller app not detected on this device. Please use Google Sign-In below.");
                 }
               }, 2000);
             }}

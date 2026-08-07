@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 
 export interface UserProfile {
+  id?: string;
   name: string;
   email?: string;
   picture?: string;
@@ -33,23 +34,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return parsedUser;
   });
 
-  const login = (userProfile?: UserProfile) => {
+  React.useEffect(() => {
+    if (user && !user.id) {
+      // Sync missing ID on page load if they were already logged in locally
+      const syncProfile = async () => {
+        try {
+          const res = await fetch('/api/profiles');
+          const profiles = await res.json();
+          let dbProfile = profiles.find((p: any) => p.name === user.name);
+          if (!dbProfile) {
+            const createRes = await fetch('/api/profiles', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: user.name, calorie_goal: 2400 })
+            });
+            dbProfile = await createRes.json();
+          }
+          const updatedUser = { ...user, id: dbProfile.id };
+          setUser(updatedUser);
+          localStorage.setItem('nutri_user', JSON.stringify(updatedUser));
+        } catch (err) {
+          console.error("Failed to sync profile ID on load", err);
+        }
+      };
+      syncProfile();
+    }
+  }, [user?.id, user?.name]);
+
+  const login = async (userProfile?: UserProfile) => {
     setIsAuthenticated(true);
     localStorage.setItem('nutri_auth', 'true');
 
     const hasOnboardedLocally = localStorage.getItem('nutri_onboarded') === 'true';
+    let finalProfile = userProfile 
+      ? { ...userProfile, onboarded: userProfile.onboarded || hasOnboardedLocally }
+      : { name: "Demo User", onboarded: hasOnboardedLocally };
 
-    if (userProfile) {
-      const finalProfile = { ...userProfile, onboarded: userProfile.onboarded || hasOnboardedLocally };
-      setUser(finalProfile);
-      localStorage.setItem('nutri_user', JSON.stringify(finalProfile));
-      if (finalProfile.onboarded) {
-        localStorage.setItem('nutri_onboarded', 'true');
+    try {
+      // Check if profile exists in DB
+      const res = await fetch('/api/profiles');
+      const profiles = await res.json();
+      let dbProfile = profiles.find((p: any) => p.name === finalProfile.name);
+      
+      if (!dbProfile) {
+        // Create it
+        const createRes = await fetch('/api/profiles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: finalProfile.name, calorie_goal: 2400 })
+        });
+        dbProfile = await createRes.json();
       }
-    } else {
-      const defaultUser = { name: "Demo User", onboarded: hasOnboardedLocally };
-      setUser(defaultUser);
-      localStorage.setItem('nutri_user', JSON.stringify(defaultUser));
+      
+      finalProfile.id = dbProfile.id;
+    } catch (err) {
+      console.error("Failed to sync profile with database", err);
+    }
+
+    setUser(finalProfile);
+    localStorage.setItem('nutri_user', JSON.stringify(finalProfile));
+    if (finalProfile.onboarded) {
+      localStorage.setItem('nutri_onboarded', 'true');
     }
   };
 

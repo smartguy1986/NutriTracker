@@ -2,14 +2,19 @@ import { CheckIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { BottomNav } from '../components/BottomNav';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export function Profile() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const heightM = (user?.height || 175) / 100;
+  const bmi = ((user?.weight || 72) / (heightM * heightM)).toFixed(1);
+
   const stats = [
-    { label: "Current Weight", value: "72 kg", icon: "⚖️" },
-    { label: "Height", value: "175 cm", icon: "📏" },
-    { label: "BMI", value: "23.5", icon: "📊" },
-    { label: "Goal", value: "Maintain", icon: "🎯" },
+    { label: "Current Weight", value: `${user?.weight || 72} kg`, icon: "⚖️" },
+    { label: "Height", value: `${user?.height || 175} cm`, icon: "📏" },
+    { label: "BMI", value: bmi, icon: "📊" },
+    { label: "Goal", value: user?.goal ? user.goal.charAt(0).toUpperCase() + user.goal.slice(1) : "Maintain", icon: "🎯" },
   ];
 
   const activityData = [
@@ -47,7 +52,7 @@ export function Profile() {
               <span style={{ color: "#4ade80", fontSize: 12, fontWeight: 600 }}>Active plan</span>
             </div>
           </div>
-          <button style={{ marginLeft: "auto", background: "#1e2230", border: "none", borderRadius: 10, padding: 10, cursor: "pointer" }}>
+          <button onClick={() => navigate('/edit-profile')} style={{ marginLeft: "auto", background: "#1e2230", border: "none", borderRadius: 10, padding: 10, cursor: "pointer" }}>
             <PencilIcon className="w-5 h-5 text-brand-gray" />
           </button>
         </div>

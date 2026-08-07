@@ -4,6 +4,7 @@ import { AddMeal } from './pages/AddMeal';
 import { Stats } from './pages/Stats';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
+import { EditProfile } from './pages/EditProfile';
 import { Login } from './pages/Login';
 import { VerifyOTP } from './pages/VerifyOTP';
 import { Onboarding } from './pages/Onboarding';
@@ -41,6 +42,7 @@ function App() {
       <Route path="/add-meal" element={<ProtectedRoute><AddMeal /></ProtectedRoute>} />
       <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
     </Routes>
   );

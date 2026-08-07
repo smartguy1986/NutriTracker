@@ -42,13 +42,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const res = await fetch('/api/profiles');
           const profiles = await res.json();
           let dbProfile = profiles.find((p: any) => p.name === user.name);
+          
+          const payload = {
+            name: user.name,
+            email: user.email,
+            avatar_url: user.picture,
+            onboarded: user.onboarded ? 1 : 0
+          };
+
+          const savedSettings = localStorage.getItem('user_settings');
+          const calorie_goal = savedSettings ? JSON.parse(savedSettings).calorieGoal : 2400;
+
           if (!dbProfile) {
             const createRes = await fetch('/api/profiles', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name: user.name, calorie_goal: 2400 })
+              body: JSON.stringify({ ...payload, calorie_goal })
             });
             dbProfile = await createRes.json();
+          } else {
+            const updateRes = await fetch('/api/profiles', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...payload, calorie_goal, id: dbProfile.id })
+            });
+            dbProfile = await updateRes.json();
           }
           const updatedUser = { ...user, id: dbProfile.id };
           setUser(updatedUser);
@@ -59,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       syncProfile();
     }
-  }, [user?.id, user?.name]);
+  }, [user?.id, user?.name, user?.email, user?.picture, user?.onboarded]);
 
   const login = async (userProfile?: UserProfile) => {
     setIsAuthenticated(true);
@@ -76,14 +94,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profiles = await res.json();
       let dbProfile = profiles.find((p: any) => p.name === finalProfile.name);
       
+      const payload = {
+        name: finalProfile.name,
+        email: finalProfile.email,
+        avatar_url: finalProfile.picture,
+        onboarded: finalProfile.onboarded ? 1 : 0
+      };
+      
+      const savedSettings = localStorage.getItem('user_settings');
+      const calorie_goal = savedSettings ? JSON.parse(savedSettings).calorieGoal : 2400;
+
       if (!dbProfile) {
         // Create it
         const createRes = await fetch('/api/profiles', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: finalProfile.name, calorie_goal: 2400 })
+          body: JSON.stringify({ ...payload, calorie_goal })
         });
         dbProfile = await createRes.json();
+      } else {
+        // Update it
+        const updateRes = await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, calorie_goal, id: dbProfile.id })
+        });
+        dbProfile = await updateRes.json();
       }
       
       finalProfile.id = dbProfile.id;

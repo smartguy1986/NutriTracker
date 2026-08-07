@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { DailyLog, MealRecord, UserSettings } from '../types';
 import { useAuth } from './AuthContext';
 import { fetchMeals, createMeal } from '../services/api';

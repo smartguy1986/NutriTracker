@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeftIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';

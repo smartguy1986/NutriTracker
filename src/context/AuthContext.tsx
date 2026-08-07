@@ -51,6 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const profiles = await res.json();
           let dbProfile = profiles.find((p: any) => p.name === user.name);
           
+          if (dbProfile) {
+             user.weight = user.weight ?? (dbProfile.weight ? Number(dbProfile.weight) : undefined);
+             user.height = user.height ?? (dbProfile.height ? Number(dbProfile.height) : undefined);
+             user.target_weight = user.target_weight ?? (dbProfile.target_weight ? Number(dbProfile.target_weight) : undefined);
+             user.activity = user.activity ?? dbProfile.activity;
+             user.goal = user.goal ?? dbProfile.goal;
+             user.rate = user.rate ?? (dbProfile.rate ? Number(dbProfile.rate) : undefined);
+             user.diet = user.diet ?? (dbProfile.diet ? JSON.parse(dbProfile.diet) : undefined);
+             user.calorie_goal = user.calorie_goal ?? dbProfile.calorie_goal;
+          }
+
           const payload = {
             name: user.name,
             email: user.email,
@@ -120,6 +131,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profiles = await res.json();
       let dbProfile = profiles.find((p: any) => p.name === finalProfile.name);
       
+      if (dbProfile) {
+         finalProfile.weight = finalProfile.weight ?? (dbProfile.weight ? Number(dbProfile.weight) : undefined);
+         finalProfile.height = finalProfile.height ?? (dbProfile.height ? Number(dbProfile.height) : undefined);
+         finalProfile.target_weight = finalProfile.target_weight ?? (dbProfile.target_weight ? Number(dbProfile.target_weight) : undefined);
+         finalProfile.activity = finalProfile.activity ?? dbProfile.activity;
+         finalProfile.goal = finalProfile.goal ?? dbProfile.goal;
+         finalProfile.rate = finalProfile.rate ?? (dbProfile.rate ? Number(dbProfile.rate) : undefined);
+         finalProfile.diet = finalProfile.diet ?? (dbProfile.diet ? JSON.parse(dbProfile.diet) : undefined);
+         finalProfile.calorie_goal = finalProfile.calorie_goal ?? dbProfile.calorie_goal;
+      }
+
       const payload = {
         name: finalProfile.name,
         email: finalProfile.email,

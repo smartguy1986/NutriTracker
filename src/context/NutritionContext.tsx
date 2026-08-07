@@ -95,9 +95,21 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
     addMealMutation.mutate(dbMealPayload as any);
   };
 
-  const updateSettings = (newSettings: UserSettings) => {
+  const updateSettings = async (newSettings: UserSettings) => {
     setSettings(newSettings);
     localStorage.setItem('user_settings', JSON.stringify(newSettings));
+    
+    if (user?.id) {
+      try {
+        await fetch('/api/profiles', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: user.id, calorie_goal: newSettings.calorieGoal })
+        });
+      } catch (err) {
+        console.error("Failed to sync calorie goal to database", err);
+      }
+    }
   };
 
   return (

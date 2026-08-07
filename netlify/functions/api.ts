@@ -39,6 +39,19 @@ export default async (req: Request, context: Context) => {
           headers: { "Content-Type": "application/json" },
         });
       }
+      if (req.method === "PUT") {
+        const body = await req.json();
+        if (!body.id) return new Response("Missing id", { status: 400 });
+        
+        const updatedProfile = await db.update(profiles)
+          .set(body)
+          .where(eq(profiles.id, body.id))
+          .returning();
+          
+        return new Response(JSON.stringify(updatedProfile[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     return new Response("Not Found", { status: 404 });

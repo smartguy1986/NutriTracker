@@ -9,7 +9,7 @@ export default async (req: Request, context: Context) => {
   
   // Basic routing based on pathname
   try {
-    if (path === "/api/meals") {
+    if (path.includes("/meals")) {
       if (req.method === "GET") {
         const allMeals = await db.select().from(meals);
         return new Response(JSON.stringify(allMeals), {
@@ -25,7 +25,7 @@ export default async (req: Request, context: Context) => {
       }
     }
 
-    if (path === "/api/profiles") {
+    if (path.includes("/profiles")) {
       if (req.method === "GET") {
         const allProfiles = await db.select().from(profiles);
         return new Response(JSON.stringify(allProfiles), {
@@ -62,4 +62,8 @@ export default async (req: Request, context: Context) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+};
+
+export const config = {
+  path: "/api/*"
 };

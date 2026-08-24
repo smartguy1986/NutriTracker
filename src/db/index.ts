@@ -1,17 +1,19 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 import * as schema from './schema';
+import { getDatabase } from '@netlify/database';
 
-import { getConnectionString } from '@netlify/database';
-
-// @ts-ignore
-let connectionString = process.env.DATABASE_URL;
+let httpClient;
 try {
-  connectionString = getConnectionString();
+  // Try to use Netlify's built-in DB connection which handles credentials automatically
+  const netlifyDb = getDatabase();
+  // @ts-ignore - The httpClient is present on the serverless driver
+  // @ts-ignore
+  httpClient = netlifyDb.httpClient || neon(process.env.DATABASE_URL!);
 } catch (error) {
-  // Fall back to DATABASE_URL locally
+  // If getDatabase fails (e.g., local dev without netlify cli), fall back to manual env var
+  // @ts-ignore
+  httpClient = neon(process.env.DATABASE_URL!);
 }
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-export const client = postgres(connectionString!, { prepare: false });
-export const db = drizzle(client, { schema });
+export const db = drizzle(httpClient, { schema });

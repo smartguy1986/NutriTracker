@@ -33,3 +33,16 @@ export const meals = pgTable('meals', {
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   logged_date: date('logged_date').default(sql`CURRENT_DATE`).notNull(),
 });
+
+export const foods = pgTable('foods', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  category: text('category').notNull(),
+  serving_size: text('serving_size').notNull(),
+  serving_unit: text('serving_unit').notNull(),
+  calories: numeric('calories').notNull(),
+  protein: numeric('protein').notNull(),
+  carbs: numeric('carbs').notNull(),
+  fat: numeric('fat').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});

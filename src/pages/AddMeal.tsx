@@ -19,14 +19,24 @@ export function AddMeal() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    if (search.length < 2) {
+    if (search.trim().length < 2) {
       setSearchResults([]);
       return;
     }
     
-    // The search is synchronous and fast since it's local
-    const results = searchFood(search);
-    setSearchResults(results);
+    let active = true;
+    const fetchResults = async () => {
+      const results = await searchFood(search);
+      if (active) {
+        setSearchResults(results);
+      }
+    };
+    
+    const timeoutId = setTimeout(fetchResults, 300);
+    return () => {
+      active = false;
+      clearTimeout(timeoutId);
+    };
   }, [search, searchFood]);
 
   const handleConfirm = () => {

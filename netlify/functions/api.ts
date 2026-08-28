@@ -1,7 +1,8 @@
 import { Context } from "@netlify/functions";
 import { db } from "../../src/db/index";
-import { meals, profiles } from "../../src/db/schema";
-import { eq } from "drizzle-orm";
+import { meals, profiles, foods as foodsSchema } from "../../src/db/schema";
+import { eq, ilike } from "drizzle-orm";
+import foodsData from "../../src/data/foods.json";
 
 export default async (req: Request, context: Context) => {
   const url = new URL(req.url);
@@ -9,6 +10,33 @@ export default async (req: Request, context: Context) => {
   
   // Basic routing based on pathname
   try {
+    if (path.includes("/foods")) {
+      if (req.method === "GET") {
+        const query = url.searchParams.get("query")?.toLowerCase() || "";
+        
+        // If not in production, use the local file
+        if (process.env.CONTEXT !== "production") {
+          let results = foodsData;
+          if (query) {
+             results = foodsData.filter((f: any) => f.name.toLowerCase().includes(query));
+          }
+          return new Response(JSON.stringify(results.slice(0, 50)), {
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        
+        // Production: query database
+        let queryBuilder = db.select().from(foodsSchema);
+        if (query) {
+          queryBuilder = queryBuilder.where(ilike(foodsSchema.name, `%${query}%`));
+        }
+        const dbFoods = await queryBuilder.limit(50);
+        return new Response(JSON.stringify(dbFoods), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
     if (path.includes("/meals")) {
       if (req.method === "GET") {
         const allMeals = await db.select().from(meals);

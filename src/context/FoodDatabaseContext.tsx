@@ -22,7 +22,7 @@ const FoodDatabaseContext = createContext<FoodDatabaseContextType | undefined>(u
 export function FoodDatabaseProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
 
-  const searchFood = async (query: string): Promise<FoodItem[]> => {
+  const searchFood = React.useCallback(async (query: string): Promise<FoodItem[]> => {
     if (!query || query.trim().length < 2) return [];
     
     setLoading(true);
@@ -37,7 +37,7 @@ export function FoodDatabaseProvider({ children }: { children: React.ReactNode }
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return (
     <FoodDatabaseContext.Provider value={{ db: [], loading, searchFood: searchFood as any }}>

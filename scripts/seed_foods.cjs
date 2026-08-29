@@ -1,4 +1,3 @@
-require('dotenv').config();
 const { neon } = require('@neondatabase/serverless');
 const foodsData = require('../src/data/foods.json');
 
@@ -9,6 +8,9 @@ async function seed() {
   }
   
   const sql = neon(process.env.DATABASE_URL);
+  
+  console.log("Clearing old foods...");
+  await sql`DELETE FROM foods;`;
   
   console.log(`Starting to seed ${foodsData.length} foods...`);
   

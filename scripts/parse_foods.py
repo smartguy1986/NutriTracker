@@ -72,11 +72,17 @@ def parse_and_save():
             
             # Extract macros. Energy is in kJ in food_plans, convert to kcal
             energy_kj = float(r[11]) if len(r) > 11 and r[11] else 0.0
+            carbs = float(r[10]) if len(r) > 10 and r[10] else 0.0
+            
+            # Heuristic for shifted columns (missing fibre cells)
+            if energy_kj == 0.0 and carbs > 100:
+                energy_kj = carbs
+                carbs = float(r[9]) if len(r) > 9 and r[9] else 0.0
+            
             calories = energy_kj / 4.184
             
-            protein = float(r[4]) if r[4] else 0.0
-            fat = float(r[6]) if r[6] else 0.0
-            carbs = float(r[10]) if r[10] else 0.0
+            protein = float(r[4]) if len(r) > 4 and r[4] else 0.0
+            fat = float(r[6]) if len(r) > 6 and r[6] else 0.0
 
             if "(1 piece)" in name.lower() or "(piece)" in name.lower():
                 piece_weight = 100.0 # Setting to 100 means factor=1. So 1 piece = exactly the macros listed.

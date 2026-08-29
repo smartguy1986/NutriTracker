@@ -2,6 +2,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 import json
 import uuid
+import re
 
 def read_xlsx(filename):
     with zipfile.ZipFile(filename, 'r') as z:
@@ -53,8 +54,9 @@ def parse_and_save():
     rows = read_xlsx('food_plans.xlsx')
     
     foods = []
+    # Skip header
     for r in rows[1:]:
-        if len(r) < 3:
+        if len(r) < 11:
             continue
             
         try:
@@ -62,15 +64,31 @@ def parse_and_save():
             if not name:
                 continue
             
-            category = str(r[1]).strip() if len(r) > 1 and r[1] else "Other"
-                
-            protein = float(r[4]) if len(r) > 4 and r[4] else 0.0
-            fat = float(r[6]) if len(r) > 6 and r[6] else 0.0
-            carbs = float(r[10]) if len(r) > 10 and r[10] else 0.0
+            category = str(r[1]).strip() if len(r) > 1 else "Other"
+            
+            # If the name contains "(1 piece)", we can extract it
+            piece_weight = None
+            piece_unit = None
+            
+            # Extract macros. Energy is in kJ in food_plans, convert to kcal
             energy_kj = float(r[11]) if len(r) > 11 and r[11] else 0.0
             calories = energy_kj / 4.184
             
-            foods.append({
+            protein = float(r[4]) if r[4] else 0.0
+            fat = float(r[6]) if r[6] else 0.0
+            carbs = float(r[10]) if r[10] else 0.0
+
+            if "(1 piece)" in name.lower() or "(piece)" in name.lower():
+                piece_weight = 100.0 # Setting to 100 means factor=1. So 1 piece = exactly the macros listed.
+                piece_unit = "piece"
+                name = re.sub(r'\(1 piece\)', '', name, flags=re.IGNORECASE).strip()
+                name = re.sub(r'\(piece\)', '', name, flags=re.IGNORECASE).strip()
+            elif "(1 cup)" in name.lower():
+                piece_weight = 100.0
+                piece_unit = "cup"
+                name = re.sub(r'\(1 cup\)', '', name, flags=re.IGNORECASE).strip()
+
+            food_obj = {
                 "id": str(uuid.uuid4()),
                 "name": name,
                 "category": category,
@@ -80,7 +98,12 @@ def parse_and_save():
                 "protein": round(protein, 1),
                 "carbs": round(carbs, 1),
                 "fat": round(fat, 1)
-            })
+            }
+            if piece_weight:
+                food_obj["piece_weight"] = piece_weight
+                food_obj["piece_unit"] = piece_unit
+                
+            foods.append(food_obj)
         except Exception as e:
             pass
             

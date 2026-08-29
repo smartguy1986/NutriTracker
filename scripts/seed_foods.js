@@ -18,7 +18,7 @@ async function seed() {
     
     for (const food of batch) {
       await sql`
-        INSERT INTO foods (id, name, category, serving_size, serving_unit, calories, protein, carbs, fat)
+        INSERT INTO foods (id, name, category, serving_size, serving_unit, calories, protein, carbs, fat, piece_weight, piece_unit)
         VALUES (
           ${food.id},
           ${food.name},
@@ -28,7 +28,9 @@ async function seed() {
           ${food.calories},
           ${food.protein},
           ${food.carbs},
-          ${food.fat}
+          ${food.fat},
+          ${food.piece_weight || null},
+          ${food.piece_unit || null}
         )
         ON CONFLICT (id) DO NOTHING;
       `;

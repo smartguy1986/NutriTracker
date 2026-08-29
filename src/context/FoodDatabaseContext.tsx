@@ -7,6 +7,8 @@ export interface FoodItem {
   protein: number;  // per 100g
   carbs: number;    // per 100g
   fat: number;      // per 100g
+  piece_weight?: number;
+  piece_unit?: string;
 }
 
 interface FoodDatabaseContextType {

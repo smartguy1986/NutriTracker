@@ -44,5 +44,7 @@ export const foods = pgTable('foods', {
   protein: numeric('protein').notNull(),
   carbs: numeric('carbs').notNull(),
   fat: numeric('fat').notNull(),
+  piece_weight: numeric('piece_weight'),
+  piece_unit: text('piece_unit'),
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });

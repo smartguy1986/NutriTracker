@@ -6,6 +6,8 @@ create table public.profiles (
   name text,
   avatar_url text,
   calorie_goal integer default 2000,
+  theme text default 'dark',
+  accent_color text default 'green',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 

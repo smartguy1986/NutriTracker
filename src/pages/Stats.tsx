@@ -1,110 +1,128 @@
 import { BarChart, Bar, XAxis, Tooltip, Cell, ResponsiveContainer, PieChart, Pie } from 'recharts';
 import { useNutrition } from '../context/NutritionContext';
 import { BottomNav } from '../components/BottomNav';
-
-const WEEK_DATA = [
-  { day: "Mon", calories: 1820 },
-  { day: "Tue", calories: 2100 },
-  { day: "Wed", calories: 1950 },
-  { day: "Thu", calories: 2200 },
-  { day: "Fri", calories: 1780 },
-  { day: "Sat", calories: 2350 },
-  { day: "Sun", calories: 783 },
-];
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 export function Stats() {
-  const { dailyLog } = useNutrition();
+  const { selectedDateLog: dailyLog, selectedDate, setSelectedDate, weeklyData } = useNutrition();
 
   const macroData = [
-    { name: "Protein", value: Math.round(dailyLog.totalProtein), color: "#60a5fa" },
-    { name: "Carbs", value: Math.round(dailyLog.totalCarbs), color: "#fb923c" },
-    { name: "Fat", value: Math.round(dailyLog.totalFat), color: "#f472b6" },
+  { name: "Protein", value: Math.round(dailyLog.totalProtein), color: "#3b82f6" },
+  { name: "Carbs", value: Math.round(dailyLog.totalCarbs), color: "#f97316" },
+  { name: "Fat", value: Math.round(dailyLog.totalFat), color: "#ec4899" },
   ];
 
-  const sortedMeals = [...dailyLog.meals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const sortedMeals = dailyLog.meals;
+
+  const dateObj = new Date(selectedDate + "T12:00:00");
+  const formattedDate = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const isToday = new Date().toISOString().split('T')[0] === selectedDate;
+
+  const changeDate = (days: number) => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() + days);
+    const newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    setSelectedDate(newDate);
+  };
 
   return (
-    <div className="font-sans pb-32 bg-brand-bg min-h-screen text-brand-text">
-      <div style={{ padding: "52px 20px 20px", background: "#0f1320" }} className="max-w-md mx-auto">
-        <h2 style={{ color: "#f0f2f5", fontSize: 22, fontWeight: 800, marginBottom: 4 }}>Daily Progress</h2>
-        <p style={{ color: "#6b7585", fontSize: 13 }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+  <div className="font-sans pb-32 min-h-screen text-brand-text transition-colors duration-300">
+  <div className="max-w-md mx-auto pt-12 px-5 pb-5 glass-card border-b border-brand-border/10 rounded-b-3xl">
+    <h2 className="text-brand-text text-2xl font-extrabold mb-4">Daily Progress</h2>
+    <div className="flex items-center justify-between">
+      <button onClick={() => changeDate(-1)} className="p-2 rounded-xl bg-brand-surfaceLight hover:bg-brand-border/20 transition-colors">
+        <ChevronLeftIcon className="w-5 h-5 text-brand-text" />
+      </button>
+      <div className="text-center relative">
+        <p className="text-brand-textMuted text-sm font-medium">{formattedDate}{isToday && ' (Today)'}</p>
+        <input 
+          type="date" 
+          value={selectedDate} 
+          onChange={(e) => { if(e.target.value) setSelectedDate(e.target.value); }} 
+          className="absolute inset-0 opacity-0 cursor-pointer w-full" 
+        />
       </div>
-
-      <div style={{ padding: "16px 20px" }} className="max-w-md mx-auto">
-        {/* Week bar chart */}
-        <div style={{ background: "#161921", borderRadius: 20, padding: 20, marginBottom: 16 }}>
-          <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 16 }}>Weekly Overview</p>
-          <ResponsiveContainer width="100%" height={120}>
-            <BarChart data={WEEK_DATA} barSize={24}>
-              <XAxis dataKey="day" tick={{ fill: "#6b7585", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ background: "#1e2230", border: "none", borderRadius: 10, color: "#f0f2f5", fontSize: 12 }}
-                cursor={{ fill: "rgba(255,255,255,0.03)" }}
-              />
-              <Bar dataKey="calories" fill="#4ade80" radius={[6, 6, 0, 0]}>
-                {WEEK_DATA.map((d, i) => (
-                  <Cell key={i} fill={d.day === "Sun" ? "#4ade80" : "#1e2230"} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Macro donut */}
-        <div style={{ background: "#161921", borderRadius: 20, padding: 20, marginBottom: 16, display: "flex", alignItems: "center", gap: 20 }}>
-          <ResponsiveContainer width={120} height={120}>
-            <PieChart>
-              <Pie data={macroData} cx="50%" cy="50%" innerRadius={36} outerRadius={55} dataKey="value" strokeWidth={0}>
-                {macroData.map((e, i) => <Cell key={i} fill={e.color} />)}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{ flex: 1 }}>
-            <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Macro Split</p>
-            {macroData.map((m) => (
-              <div key={m.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: m.color }} />
-                <span style={{ flex: 1, color: "#6b7585", fontSize: 12 }}>{m.name}</span>
-                <span style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 13 }} className="font-mono">{m.value}g</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Logged Items */}
-        <p style={{ color: "#6b7585", fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 600, marginBottom: 12 }}>Logged Items</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {sortedMeals.length === 0 ? (
-            <div style={{ background: "#161921", borderRadius: 16, padding: 24, textAlign: "center" }}>
-              <p style={{ color: "#6b7585", fontSize: 14 }}>No logs for today</p>
-            </div>
-          ) : (
-            sortedMeals.map((meal) => {
-              const timeStr = new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              return (
-                <div key={meal.id} style={{ background: "#161921", borderRadius: 18, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 15 }}>{meal.foodName}</p>
-                    <p style={{ color: "#6b7585", fontSize: 12, marginTop: 2 }}>{timeStr} · {meal.quantity} {meal.unit}</p>
-                    <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-                      <span style={{ fontSize: 11, color: "#60a5fa" }} className="font-mono">{Math.round(meal.protein)}g P</span>
-                      <span style={{ fontSize: 11, color: "#fb923c" }} className="font-mono">{Math.round(meal.carbs)}g C</span>
-                      <span style={{ fontSize: 11, color: "#f472b6" }} className="font-mono">{Math.round(meal.fat)}g F</span>
-                    </div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 18 }} className="font-mono">
-                      {Math.round(meal.calories)}
-                    </p>
-                    <p style={{ color: "#6b7585", fontSize: 11 }}>kcal</p>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-      <BottomNav />
+      <button onClick={() => changeDate(1)} className="p-2 rounded-xl bg-brand-surfaceLight hover:bg-brand-border/20 transition-colors">
+        <ChevronRightIcon className="w-5 h-5 text-brand-text" />
+      </button>
     </div>
-  );
+  </div>
+
+ <div className="max-w-md mx-auto p-5">
+ {/* Week bar chart */}
+ <div className="glass-card rounded-[24px] p-5 mb-5 border border-brand-border/10">
+ <p className="text-brand-textMuted text-xs uppercase tracking-widest font-semibold mb-4">Weekly Overview</p>
+ <ResponsiveContainer width="100%" height={140}>
+ <BarChart data={weeklyData} barSize={28}>
+ <XAxis dataKey="day" tick={{ fill: "var(--color-text-muted)", fontSize: 11 }} axisLine={false} tickLine={false} />
+ <Tooltip
+ contentStyle={{ background: "rgb(var(--color-surface))", border: "1px solid rgba(var(--color-border), 0.1)", borderRadius: 12, color: "rgb(var(--color-text))", fontSize: 13, fontWeight: 'bold' }}
+ cursor={{ fill: "rgba(var(--color-text-muted), 0.1)" }}
+ />
+ <Bar dataKey="calories" fill="rgb(var(--color-accent))" radius={[8, 8, 0, 0]}>
+ {weeklyData.map((d, i) => (
+ <Cell key={i} fill={d.day === "Sun" ? "rgb(var(--color-accent))" : "rgba(var(--color-accent), 0.2)"} />
+ ))}
+ </Bar>
+ </BarChart>
+ </ResponsiveContainer>
+ </div>
+
+ {/* Macro donut */}
+ <div className="glass-card rounded-[24px] p-5 mb-6 border border-brand-border/10 flex items-center gap-6">
+ <ResponsiveContainer width={120} height={120}>
+ <PieChart>
+ <Pie data={macroData} cx="50%" cy="50%" innerRadius={36} outerRadius={55} dataKey="value" strokeWidth={0}>
+ {macroData.map((e, i) => <Cell key={i} fill={e.color} />)}
+ </Pie>
+ </PieChart>
+ </ResponsiveContainer>
+ <div className="flex-1">
+ <p className="text-brand-text font-bold text-[15px] mb-3">Macro Split</p>
+ {macroData.map((m) => (
+ <div key={m.name} className="flex items-center gap-2.5 mb-2">
+ <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.color }} />
+ <span className="flex-1 text-brand-textMuted text-[13px] font-medium">{m.name}</span>
+ <span className="text-brand-text font-extrabold text-[14px] font-mono">{m.value}g</span>
+ </div>
+ ))}
+ </div>
+ </div>
+
+ {/* Logged Items */}
+ <p className="text-brand-textMuted text-xs uppercase tracking-widest font-semibold mb-3">Logged Items</p>
+ <div className="flex flex-col gap-3">
+ {sortedMeals.length === 0 ? (
+ <div className="glass-card rounded-[20px] p-8 text-center border border-brand-border/10">
+ <p className="text-brand-textMuted text-sm font-medium">No logs for today</p>
+ </div>
+ ) : (
+ sortedMeals.map((meal) => {
+ const timeStr = new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+ return (
+ <div key={meal.id} className="glass-card rounded-[20px] p-4 flex items-center justify-between gap-4 border border-brand-border/10 hover:border-brand-accent/30 transition-colors">
+ <div className="flex-1">
+ <p className="text-brand-text font-bold text-[15px]">{meal.foodName}</p>
+ <p className="text-brand-textMuted text-xs font-medium mt-0.5">{timeStr} · {meal.quantity} {meal.unit}</p>
+ <div className="flex gap-3 mt-2">
+ <span className="text-xs text-blue-500 font-extrabold font-mono">{Math.round(meal.protein)}g P</span>
+ <span className="text-xs text-orange-500 font-extrabold font-mono">{Math.round(meal.carbs)}g C</span>
+ <span className="text-xs text-pink-500 font-extrabold font-mono">{Math.round(meal.fat)}g F</span>
+ </div>
+ </div>
+ <div className="text-right">
+ <p className="text-brand-accent font-extrabold text-xl font-mono leading-none">
+ {Math.round(meal.calories)}
+ </p>
+ <p className="text-brand-textMuted text-[11px] font-medium mt-1">kcal</p>
+ </div>
+ </div>
+ );
+ })
+ )}
+ </div>
+ </div>
+ <BottomNav />
+ </div>
+ );
 }

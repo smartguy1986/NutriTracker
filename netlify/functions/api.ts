@@ -71,9 +71,11 @@ export default async (req: Request, context: Context) => {
         const body = await req.json();
         if (!body.id) return new Response("Missing id", { status: 400 });
         
+        const { id, created_at, ...updateData } = body;
+        
         const updatedProfile = await db.update(profiles)
-          .set(body)
-          .where(eq(profiles.id, body.id))
+          .set(updateData)
+          .where(eq(profiles.id, id))
           .returning();
           
         return new Response(JSON.stringify(updatedProfile[0]), {
@@ -99,9 +101,12 @@ export default async (req: Request, context: Context) => {
       if (req.method === "PUT") {
         const body = await req.json();
         if (!body.id) return new Response("Missing id", { status: 400 });
+        
+        const { id, created_at, ...updateData } = body;
+        
         const updatedGoal = await db.update(user_goals)
-          .set(body)
-          .where(eq(user_goals.id, body.id))
+          .set(updateData)
+          .where(eq(user_goals.id, id))
           .returning();
         return new Response(JSON.stringify(updatedGoal[0]), {
           headers: { "Content-Type": "application/json" },
@@ -126,9 +131,12 @@ export default async (req: Request, context: Context) => {
       if (req.method === "PUT") {
         const body = await req.json();
         if (!body.id) return new Response("Missing id", { status: 400 });
+        
+        const { id, created_at, ...updateData } = body;
+        
         const updatedActivity = await db.update(user_activity)
-          .set(body)
-          .where(eq(user_activity.id, body.id))
+          .set(updateData)
+          .where(eq(user_activity.id, id))
           .returning();
         return new Response(JSON.stringify(updatedActivity[0]), {
           headers: { "Content-Type": "application/json" },

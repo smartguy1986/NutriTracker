@@ -85,6 +85,19 @@ export function EditProfile() {
  <h3 className="text-[11px] font-bold text-brand-textMuted uppercase tracking-widest">Body Metrics</h3>
  <div className="grid grid-cols-2 gap-4">
  <div>
+ <label className="text-[10px] text-brand-textMuted font-bold uppercase tracking-wider mb-2 block">Age</label>
+ <input type="number" value={data.age} onChange={e => setData({...data, age: Number(e.target.value)})} className="w-full glass-card border border-brand-border/20 rounded-2xl px-5 py-4 text-brand-text text-lg font-bold font-mono outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all " />
+ </div>
+ <div>
+ <label className="text-[10px] text-brand-textMuted font-bold uppercase tracking-wider mb-2 block">Sex</label>
+ <select value={data.sex} onChange={e => setData({...data, sex: e.target.value})} className="w-full glass-card border border-brand-border/20 rounded-2xl px-5 py-4 text-brand-text text-lg font-bold outline-none appearance-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all ">
+ <option>Male</option>
+ <option>Female</option>
+ </select>
+ </div>
+ </div>
+ <div className="grid grid-cols-2 gap-4">
+ <div>
  <label className="text-[10px] text-brand-textMuted font-bold uppercase tracking-wider mb-2 block">Height (cm)</label>
  <input type="number" value={data.height} onChange={e => setData({...data, height: Number(e.target.value)})} className="w-full glass-card border border-brand-border/20 rounded-2xl px-5 py-4 text-brand-text text-lg font-bold font-mono outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all " />
  </div>

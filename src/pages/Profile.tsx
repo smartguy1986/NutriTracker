@@ -4,13 +4,31 @@ import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { useNutrition } from '../context/NutritionContext';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export function Profile() {
   const { user } = useAuth();
-  const { weeklyData, achievements: userAchievements } = useNutrition();
+  const { weeklyData, achievements: userAchievements, settings, updateSettings } = useNutrition();
   const navigate = useNavigate();
   const heightM = (user?.height || 175) / 100;
   const bmi = ((user?.weight || 72) / (heightM * heightM)).toFixed(1);
+
+  const [isEditingGoals, setIsEditingGoals] = useState(false);
+
+  const [goals, setGoals] = useState({
+    calorieGoal: settings.calorieGoal,
+    proteinGoal: settings.proteinGoal,
+    carbsGoal: settings.carbsGoal,
+    fatGoal: settings.fatGoal
+  });
+
+  const handleGoalChange = (field: keyof typeof goals, value: string) => {
+    setGoals(prev => ({ ...prev, [field]: Number(value) || 0 }));
+  };
+
+  const saveGoals = () => {
+    updateSettings({ ...settings, ...goals });
+  };
 
   const stats = [
   { label: "Current Weight", value: `${user?.weight || 72} kg`, icon: "⚖️" },
@@ -60,6 +78,84 @@ export function Profile() {
  </div>
  ))}
  </div>
+
+  {/* Nutrition Goals Section */}
+  <div className="mb-5">
+  <div className="flex justify-between items-center mb-3">
+    <p className="text-brand-textMuted text-xs uppercase tracking-widest font-semibold">Nutrition Goals</p>
+    {!isEditingGoals && (
+      <button onClick={() => setIsEditingGoals(true)} className="text-brand-accent hover:bg-brand-accent/10 p-1.5 rounded-md transition-colors">
+        <PencilIcon className="w-4 h-4" />
+      </button>
+    )}
+  </div>
+  <div className="glass-card rounded-[24px] overflow-hidden border border-brand-border/10 p-5 space-y-4">
+    <div className="flex items-center justify-between">
+      <span className="text-[15px] font-bold text-brand-text">Calories (kcal)</span>
+      {isEditingGoals ? (
+        <input 
+          type="number" 
+          value={goals.calorieGoal} 
+          onChange={(e) => handleGoalChange('calorieGoal', e.target.value)}
+          className="w-24 bg-brand-surfaceLight text-brand-text font-mono font-bold border border-brand-border/20 rounded-xl px-3 py-2 text-right outline-none focus:ring-1 focus:ring-brand-accent transition-all"
+        />
+      ) : (
+        <span className="font-mono font-extrabold text-brand-text text-lg">{goals.calorieGoal}</span>
+      )}
+    </div>
+    <div className="flex items-center justify-between">
+      <span className="text-[15px] font-bold text-brand-text">Protein (g)</span>
+      {isEditingGoals ? (
+        <input 
+          type="number" 
+          value={goals.proteinGoal} 
+          onChange={(e) => handleGoalChange('proteinGoal', e.target.value)}
+          className="w-24 bg-brand-surfaceLight text-brand-text font-mono font-bold border border-brand-border/20 rounded-xl px-3 py-2 text-right outline-none focus:ring-1 focus:ring-brand-accent transition-all"
+        />
+      ) : (
+        <span className="font-mono font-extrabold text-brand-text text-lg">{goals.proteinGoal}</span>
+      )}
+    </div>
+    <div className="flex items-center justify-between">
+      <span className="text-[15px] font-bold text-brand-text">Carbs (g)</span>
+      {isEditingGoals ? (
+        <input 
+          type="number" 
+          value={goals.carbsGoal} 
+          onChange={(e) => handleGoalChange('carbsGoal', e.target.value)}
+          className="w-24 bg-brand-surfaceLight text-brand-text font-mono font-bold border border-brand-border/20 rounded-xl px-3 py-2 text-right outline-none focus:ring-1 focus:ring-brand-accent transition-all"
+        />
+      ) : (
+        <span className="font-mono font-extrabold text-brand-text text-lg">{goals.carbsGoal}</span>
+      )}
+    </div>
+    <div className="flex items-center justify-between">
+      <span className="text-[15px] font-bold text-brand-text">Fat (g)</span>
+      {isEditingGoals ? (
+        <input 
+          type="number" 
+          value={goals.fatGoal} 
+          onChange={(e) => handleGoalChange('fatGoal', e.target.value)}
+          className="w-24 bg-brand-surfaceLight text-brand-text font-mono font-bold border border-brand-border/20 rounded-xl px-3 py-2 text-right outline-none focus:ring-1 focus:ring-brand-accent transition-all"
+        />
+      ) : (
+        <span className="font-mono font-extrabold text-brand-text text-lg">{goals.fatGoal}</span>
+      )}
+    </div>
+
+    {isEditingGoals && (
+      <button 
+        onClick={() => {
+          saveGoals();
+          setIsEditingGoals(false);
+        }} 
+        className="w-full mt-4 py-3 rounded-xl bg-brand-accent text-white font-bold transition-colors hover:bg-brand-accentHover"
+      >
+        Update Goals
+      </button>
+    )}
+  </div>
+  </div>
 
  <div className="glass-card rounded-[24px] p-5 mb-5 border border-brand-border/10">
  <div className="flex justify-between items-center mb-4">

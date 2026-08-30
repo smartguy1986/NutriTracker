@@ -13,7 +13,6 @@ import {
 
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useNutrition } from '../context/NutritionContext';
 import { useNavigate } from 'react-router-dom';
 
 export function Settings() {
@@ -23,22 +22,6 @@ export function Settings() {
  const { logout } = useAuth();
  const navigate = useNavigate();
  const { theme, setTheme, accentColor, setAccentColor } = useTheme();
- const { settings, updateSettings } = useNutrition();
-
- const [goals, setGoals] = useState({
-   calorieGoal: settings.calorieGoal,
-   proteinGoal: settings.proteinGoal,
-   carbsGoal: settings.carbsGoal,
-   fatGoal: settings.fatGoal
- });
-
- const handleGoalChange = (field: keyof typeof goals, value: string) => {
-   setGoals(prev => ({ ...prev, [field]: Number(value) || 0 }));
- };
-
- const saveGoals = () => {
-   updateSettings({ ...settings, ...goals });
- };
 
  const handleLogout = () => {
  logout();
@@ -64,53 +47,6 @@ export function Settings() {
  </div>
 
  <div className="max-w-md mx-auto p-5">
- 
- {/* Nutrition Goals Section */}
- <div className="mb-6">
- <p className="text-brand-textMuted text-xs uppercase tracking-widest font-semibold mb-3">Nutrition Goals</p>
- <div className="glass-card rounded-2xl overflow-hidden border border-brand-border/10 p-4 space-y-4">
-   <div className="flex items-center justify-between">
-     <span className="text-sm font-medium">Calories (kcal)</span>
-     <input 
-       type="number" 
-       value={goals.calorieGoal} 
-       onChange={(e) => handleGoalChange('calorieGoal', e.target.value)}
-       onBlur={saveGoals}
-       className="w-20 bg-brand-surfaceLight border border-brand-border/20 rounded-lg px-2 py-1 text-right text-sm outline-none focus:ring-1 focus:ring-brand-accent transition-all"
-     />
-   </div>
-   <div className="flex items-center justify-between">
-     <span className="text-sm font-medium">Protein (g)</span>
-     <input 
-       type="number" 
-       value={goals.proteinGoal} 
-       onChange={(e) => handleGoalChange('proteinGoal', e.target.value)}
-       onBlur={saveGoals}
-       className="w-20 bg-brand-surfaceLight border border-brand-border/20 rounded-lg px-2 py-1 text-right text-sm outline-none focus:ring-1 focus:ring-brand-accent transition-all"
-     />
-   </div>
-   <div className="flex items-center justify-between">
-     <span className="text-sm font-medium">Carbs (g)</span>
-     <input 
-       type="number" 
-       value={goals.carbsGoal} 
-       onChange={(e) => handleGoalChange('carbsGoal', e.target.value)}
-       onBlur={saveGoals}
-       className="w-20 bg-brand-surfaceLight border border-brand-border/20 rounded-lg px-2 py-1 text-right text-sm outline-none focus:ring-1 focus:ring-brand-accent transition-all"
-     />
-   </div>
-   <div className="flex items-center justify-between">
-     <span className="text-sm font-medium">Fat (g)</span>
-     <input 
-       type="number" 
-       value={goals.fatGoal} 
-       onChange={(e) => handleGoalChange('fatGoal', e.target.value)}
-       onBlur={saveGoals}
-       className="w-20 bg-brand-surfaceLight border border-brand-border/20 rounded-lg px-2 py-1 text-right text-sm outline-none focus:ring-1 focus:ring-brand-accent transition-all"
-     />
-   </div>
- </div>
- </div>
  
  {/* Appearance Section */}
  <div className="mb-6">

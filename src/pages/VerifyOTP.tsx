@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 export function VerifyOTP() {
  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
  const [timer, setTimer] = useState(30);
+ const [isVerifying, setIsVerifying] = useState(false);
  const navigate = useNavigate();
  const location = useLocation();
  const { login } = useAuth();
@@ -38,9 +39,10 @@ export function VerifyOTP() {
 
  const filled = otp.every((d) => d !== "");
 
- const handleVerify = () => {
- // Simulate successful verify
- login();
+ const handleVerify = async () => {
+ setIsVerifying(true);
+ // Simulate successful verify & sync with DB
+ await login();
  navigate('/');
  };
 
@@ -85,16 +87,17 @@ export function VerifyOTP() {
 
  <button
  onClick={handleVerify}
- disabled={!filled}
+ disabled={!filled || isVerifying}
  style={{
  width: "100%", padding: 16, borderRadius: 14,
  background: filled ? "#4ade80" : "#1e2230",
  color: filled ? "#0d1a0f" : "#6b7585",
  fontWeight: 700, fontSize: 16, border: "none", cursor: filled ? "pointer" : "default",
  transition: "all 0.2s", marginBottom: 20,
+ opacity: isVerifying ? 0.7 : 1
  }}
  >
- Verify & Continue
+ {isVerifying ? "Verifying..." : "Verify & Continue"}
  </button>
 
  <div className="text-center">

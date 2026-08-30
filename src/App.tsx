@@ -32,9 +32,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+import { BackgroundBlobs } from './components/BackgroundBlobs';
+
 function App() {
   return (
-    <Routes>
+    <>
+      <BackgroundBlobs />
+      <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
@@ -45,6 +49,7 @@ function App() {
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
     </Routes>
+    </>
   );
 }
 

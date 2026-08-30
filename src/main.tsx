@@ -7,6 +7,7 @@ import './index.css'
 import { NutritionProvider } from './context/NutritionContext'
 import { AuthProvider } from './context/AuthContext'
 import { FoodDatabaseProvider } from './context/FoodDatabaseContext'
+import { ThemeProvider } from './context/ThemeContext'
 
 const queryClient = new QueryClient()
 
@@ -15,11 +16,13 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
-          <FoodDatabaseProvider>
-            <NutritionProvider>
-              <App />
-            </NutritionProvider>
-          </FoodDatabaseProvider>
+          <ThemeProvider>
+            <FoodDatabaseProvider>
+              <NutritionProvider>
+                <App />
+              </NutritionProvider>
+            </FoodDatabaseProvider>
+          </ThemeProvider>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

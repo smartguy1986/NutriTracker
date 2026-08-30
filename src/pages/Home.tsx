@@ -3,10 +3,12 @@ import { CircularProgress } from '../components/CircularProgress';
 import { BottomNav } from '../components/BottomNav';
 import { useNutrition } from '../context/NutritionContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export function Home() {
- const { dailyLog, settings, todayWaterMl, updateWater } = useNutrition();
  const { user } = useAuth();
+ const { dailyLog, settings, todayWaterMl, todayCaloriesBurned, updateWater, updateCaloriesBurned } = useNutrition();
+ const { accentColor } = useTheme();
 
  const remaining = settings.calorieGoal - dailyLog.totalCalories;
  const pctCal = Math.min(dailyLog.totalCalories / settings.calorieGoal, 1);
@@ -17,8 +19,31 @@ export function Home() {
  { label: "Fat", value: dailyLog.totalFat, goal: settings.fatGoal, colorClass: "text-pink-500", bgClass: "bg-pink-500", unit: "g" },
  ];
 
+  const handleStepsPrompt = () => {
+    const steps = window.prompt("Enter your step count for today:", "");
+    if (steps) {
+      const stepsNum = parseInt(steps, 10);
+      if (!isNaN(stepsNum)) {
+        // Roughly 0.04 calories per step
+        const calories = Math.round(stepsNum * 0.04);
+        updateCaloriesBurned(calories);
+      }
+    }
+  };
+
  // Sort meals chronologically (latest first or oldest first? timeline usually newest top)
  const timelineMeals = [...dailyLog.meals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+ const currentHour = new Date().getHours();
+ let greeting = 'Good morning';
+ let emoji = '👋';
+ if (currentHour >= 12 && currentHour < 17) {
+   greeting = 'Good afternoon';
+   emoji = '☀️';
+ } else if (currentHour >= 17) {
+   greeting = 'Good evening';
+   emoji = '🌙';
+ }
 
  // Function to get computed accent color (to pass to CircularProgress if it needs a string, or modify CircularProgress to accept classes)
  // Since CircularProgress takes a string color, we might need a workaround or just pass the CSS variable
@@ -30,7 +55,7 @@ export function Home() {
  <div className="max-w-md mx-auto pt-12 px-5 pb-5 glass-card border-b border-brand-border/10 rounded-b-3xl ">
  <div className="flex justify-between items-start mb-6">
  <div>
- <p className="text-brand-textMuted text-sm mb-1">Good morning 👋</p>
+ <p className="text-brand-textMuted text-sm mb-1">{greeting} {emoji}</p>
  <h2 className="text-brand-text text-2xl font-extrabold">{user?.name || "User"}</h2>
  </div>
  {user?.picture ? (
@@ -101,15 +126,15 @@ export function Home() {
 
  {/* Quick stats */}
  <div className="grid grid-cols-2 gap-3 mb-6">
- <div className="glass-card rounded-2xl p-4 flex items-center gap-3 border border-brand-border/10">
- <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
- <FireIcon className="w-5 h-5 text-orange-500" />
- </div>
- <div>
- <p className="font-mono text-lg font-extrabold text-brand-text">562</p>
- <p className="text-xs text-brand-textMuted">kcal burned</p>
- </div>
- </div>
+  <button onClick={handleStepsPrompt} className="glass-card rounded-2xl p-4 flex items-center gap-3 border border-brand-border/10 text-left hover:bg-brand-surfaceLight transition-colors">
+  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+  <FireIcon className="w-5 h-5 text-orange-500" />
+  </div>
+  <div>
+  <p className="font-mono text-lg font-extrabold text-brand-text">{todayCaloriesBurned}</p>
+  <p className="text-xs text-brand-textMuted">kcal burned</p>
+  </div>
+  </button>
   <div className="glass-card rounded-2xl p-4 flex items-center justify-between gap-3 border border-brand-border/10">
   <div className="flex items-center gap-3">
     <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">

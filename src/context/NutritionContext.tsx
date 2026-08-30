@@ -17,7 +17,9 @@ interface NutritionContextType {
   setSelectedDate: (date: string) => void;
   weeklyData: { day: string, calories: number }[];
   todayWaterMl: number;
+  todayCaloriesBurned: number;
   updateWater: (ml: number) => void;
+  updateCaloriesBurned: (calories: number) => void;
   achievements: Achievements;
   settings: UserSettings;
   addMeal: (meal: MealRecord) => void;
@@ -148,6 +150,25 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const todayCaloriesBurned = todayActivity ? Number(todayActivity.calories_burned) : 0;
+  
+  const updateCaloriesBurned = (calories: number) => {
+    if (!user?.id) return;
+    if (todayActivity) {
+      updateActivityMutation.mutate({
+        ...todayActivity,
+        calories_burned: calories
+      });
+    } else {
+      updateActivityMutation.mutate({
+        user_id: user.id,
+        logged_date: todayDateStr,
+        water_ml: 0,
+        calories_burned: calories
+      });
+    }
+  };
+
   // --- Achievements Logic ---
   const calcAchievements = (): Achievements => {
     // 7-day streak
@@ -238,7 +259,7 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <NutritionContext.Provider value={{ dailyLog, selectedDateLog, selectedDate, setSelectedDate, weeklyData, todayWaterMl, updateWater, achievements, settings, addMeal, updateSettings }}>
+    <NutritionContext.Provider value={{ dailyLog, selectedDateLog, selectedDate, setSelectedDate, weeklyData, todayWaterMl, todayCaloriesBurned, updateWater, updateCaloriesBurned, achievements, settings, addMeal, updateSettings }}>
       {children}
     </NutritionContext.Provider>
   );

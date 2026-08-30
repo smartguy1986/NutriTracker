@@ -3,12 +3,12 @@ import { CircularProgress } from '../components/CircularProgress';
 import { BottomNav } from '../components/BottomNav';
 import { useNutrition } from '../context/NutritionContext';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+
 
 export function Home() {
  const { user } = useAuth();
  const { dailyLog, settings, todayWaterMl, todayCaloriesBurned, updateWater, updateCaloriesBurned } = useNutrition();
- const { accentColor } = useTheme();
+
 
  const remaining = settings.calorieGoal - dailyLog.totalCalories;
  const pctCal = Math.min(dailyLog.totalCalories / settings.calorieGoal, 1);

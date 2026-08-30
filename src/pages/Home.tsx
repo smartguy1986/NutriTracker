@@ -3,7 +3,7 @@ import { CircularProgress } from '../components/CircularProgress';
 import { BottomNav } from '../components/BottomNav';
 import { useNutrition } from '../context/NutritionContext';
 import { useAuth } from '../context/AuthContext';
-
+import { useState } from 'react';
 
 export function Home() {
  const { user } = useAuth();
@@ -19,17 +19,10 @@ export function Home() {
  { label: "Fat", value: dailyLog.totalFat, goal: settings.fatGoal, colorClass: "text-pink-500", bgClass: "bg-pink-500", unit: "g" },
  ];
 
-  const handleStepsPrompt = () => {
-    const steps = window.prompt("Enter your step count for today:", "");
-    if (steps) {
-      const stepsNum = parseInt(steps, 10);
-      if (!isNaN(stepsNum)) {
-        // Roughly 0.04 calories per step
-        const calories = Math.round(stepsNum * 0.04);
-        updateCaloriesBurned(calories);
-      }
-    }
-  };
+  const [showStepsModal, setShowStepsModal] = useState(false);
+  const [showWaterModal, setShowWaterModal] = useState(false);
+  const [stepInput, setStepInput] = useState("");
+  const [waterInput, setWaterInput] = useState("250");
 
  // Sort meals chronologically (latest first or oldest first? timeline usually newest top)
  const timelineMeals = [...dailyLog.meals].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -137,13 +130,14 @@ export function Home() {
 
  {/* Quick stats */}
  <div className="grid grid-cols-2 gap-3 mb-6">
-  <button onClick={handleStepsPrompt} className="glass-card rounded-2xl p-4 flex items-center gap-3 border border-brand-border/10 text-left hover:bg-brand-surfaceLight transition-colors">
+  <button onClick={() => { setStepInput(Math.round(todayCaloriesBurned / 0.04).toString()); setShowStepsModal(true); }} className="glass-card rounded-2xl p-4 flex items-center gap-3 border border-brand-border/10 text-left hover:bg-brand-surfaceLight transition-colors">
   <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
   <FireIcon className="w-5 h-5 text-orange-500" />
   </div>
   <div>
   <p className="font-mono text-lg font-extrabold text-brand-text">{todayCaloriesBurned}</p>
   <p className="text-xs text-brand-textMuted">kcal burned</p>
+  <p className="text-[10px] text-orange-500/80 font-medium mt-0.5">~{Math.round(todayCaloriesBurned / 0.04)} steps</p>
   </div>
   </button>
   <div className="glass-card rounded-2xl p-4 flex items-center justify-between gap-3 border border-brand-border/10">
@@ -157,7 +151,7 @@ export function Home() {
     </div>
   </div>
   <div className="flex flex-col gap-1">
-    <button onClick={() => updateWater(250)} className="w-6 h-6 rounded-md bg-blue-500/20 text-blue-500 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
+    <button onClick={() => setShowWaterModal(true)} className="w-6 h-6 rounded-md bg-blue-500/20 text-blue-500 flex items-center justify-center hover:bg-blue-500/30 transition-colors">
       <PlusIcon className="w-4 h-4" />
     </button>
     <button onClick={() => updateWater(-250)} className="w-6 h-6 rounded-md bg-brand-surfaceLight text-brand-textMuted flex items-center justify-center hover:bg-brand-border/20 transition-colors" disabled={todayWaterMl <= 0}>
@@ -211,6 +205,66 @@ export function Home() {
  </div>
 
  <BottomNav />
+
+  {/* Modals */}
+  {showStepsModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-brand-surface border border-brand-border/10 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+        <h3 className="text-xl font-bold mb-4 text-brand-text">Log Steps</h3>
+        <input 
+          type="number" 
+          value={stepInput}
+          onChange={e => setStepInput(e.target.value)}
+          placeholder="e.g. 5000"
+          className="w-full bg-brand-surfaceLight text-brand-text border border-brand-border/20 rounded-xl px-4 py-3 mb-4 outline-none focus:ring-2 focus:ring-orange-500 transition-all"
+        />
+        <div className="flex gap-3">
+          <button onClick={() => setShowStepsModal(false)} className="flex-1 py-3 rounded-xl font-semibold bg-brand-surfaceLight text-brand-text hover:bg-brand-border/20 transition-colors">Cancel</button>
+          <button onClick={() => {
+            const steps = parseInt(stepInput, 10);
+            if (!isNaN(steps)) {
+              updateCaloriesBurned(Math.round(steps * 0.04));
+            }
+            setShowStepsModal(false);
+          }} className="flex-1 py-3 rounded-xl font-semibold bg-orange-500 text-white hover:bg-orange-600 transition-colors">Save</button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {showWaterModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-brand-surface border border-brand-border/10 rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+        <h3 className="text-xl font-bold mb-4 text-brand-text">Log Water</h3>
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <button onClick={() => setWaterInput('150')} className={`py-2 rounded-lg text-sm font-medium transition-colors ${waterInput === '150' ? 'bg-blue-500 text-white' : 'bg-brand-surfaceLight text-brand-text hover:bg-brand-border/20'}`}>150 ml</button>
+          <button onClick={() => setWaterInput('250')} className={`py-2 rounded-lg text-sm font-medium transition-colors ${waterInput === '250' ? 'bg-blue-500 text-white' : 'bg-brand-surfaceLight text-brand-text hover:bg-brand-border/20'}`}>250 ml</button>
+          <button onClick={() => setWaterInput('500')} className={`py-2 rounded-lg text-sm font-medium transition-colors ${waterInput === '500' ? 'bg-blue-500 text-white' : 'bg-brand-surfaceLight text-brand-text hover:bg-brand-border/20'}`}>500 ml</button>
+        </div>
+        <div className="flex items-center gap-2 mb-4">
+          <input 
+            type="number" 
+            value={waterInput}
+            onChange={e => setWaterInput(e.target.value)}
+            placeholder="Custom amount"
+            className="flex-1 bg-brand-surfaceLight text-brand-text border border-brand-border/20 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          />
+          <span className="text-brand-textMuted font-medium">ml</span>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => setShowWaterModal(false)} className="flex-1 py-3 rounded-xl font-semibold bg-brand-surfaceLight text-brand-text hover:bg-brand-border/20 transition-colors">Cancel</button>
+          <button onClick={() => {
+            const ml = parseInt(waterInput, 10);
+            if (!isNaN(ml)) {
+              updateWater(ml);
+            }
+            setShowWaterModal(false);
+          }} className="flex-1 py-3 rounded-xl font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors">Add Water</button>
+        </div>
+      </div>
+    </div>
+  )}
+
  </div>
  );
 }

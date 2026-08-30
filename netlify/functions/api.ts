@@ -1,6 +1,6 @@
 import { Context } from "@netlify/functions";
 import { db } from "../../src/db/index";
-import { meals, profiles, foods as foodsSchema } from "../../src/db/schema";
+import { meals, profiles, foods as foodsSchema, user_goals, user_activity } from "../../src/db/schema";
 import { eq, ilike } from "drizzle-orm";
 import foodsData from "../../src/data/foods.json";
 
@@ -77,6 +77,60 @@ export default async (req: Request, context: Context) => {
           .returning();
           
         return new Response(JSON.stringify(updatedProfile[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    if (path.includes("/goals")) {
+      if (req.method === "GET") {
+        const allGoals = await db.select().from(user_goals);
+        return new Response(JSON.stringify(allGoals), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "POST") {
+        const body = await req.json();
+        const newGoal = await db.insert(user_goals).values(body).returning();
+        return new Response(JSON.stringify(newGoal[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "PUT") {
+        const body = await req.json();
+        if (!body.id) return new Response("Missing id", { status: 400 });
+        const updatedGoal = await db.update(user_goals)
+          .set(body)
+          .where(eq(user_goals.id, body.id))
+          .returning();
+        return new Response(JSON.stringify(updatedGoal[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    if (path.includes("/activity")) {
+      if (req.method === "GET") {
+        const allActivity = await db.select().from(user_activity);
+        return new Response(JSON.stringify(allActivity), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "POST") {
+        const body = await req.json();
+        const newActivity = await db.insert(user_activity).values(body).returning();
+        return new Response(JSON.stringify(newActivity[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "PUT") {
+        const body = await req.json();
+        if (!body.id) return new Response("Missing id", { status: 400 });
+        const updatedActivity = await db.update(user_activity)
+          .set(body)
+          .where(eq(user_activity.id, body.id))
+          .returning();
+        return new Response(JSON.stringify(updatedActivity[0]), {
           headers: { "Content-Type": "application/json" },
         });
       }

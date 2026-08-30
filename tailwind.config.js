@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -18,19 +19,25 @@ export default {
       },
       colors: {
         brand: {
-          bg: '#0d0f14', 
-          surface: '#161921',
-          surfaceLight: '#1e2230',
-          green: '#4ade80',
-          text: '#f0f2f5',
-          gray: '#6b7585',
-          border: 'rgba(255,255,255,0.08)',
+          bg: 'rgb(var(--color-bg) / <alpha-value>)', 
+          surface: 'rgb(var(--color-surface) / <alpha-value>)',
+          surfaceLight: 'rgb(var(--color-surface-light) / <alpha-value>)',
+          text: 'rgb(var(--color-text) / <alpha-value>)',
+          textMuted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+          gray: 'rgb(var(--color-gray) / <alpha-value>)',
+          border: 'rgb(var(--color-border) / <alpha-value>)',
+          accent: 'rgb(var(--color-accent) / <alpha-value>)',
+          accentHover: 'rgb(var(--color-accent-hover) / <alpha-value>)',
           red: '#ef4444',
-          blue: '#60a5fa',
-          orange: '#fb923c',
-          pink: '#f472b6',
+          blue: '#3b82f6',
+          orange: '#f97316',
+          pink: '#ec4899',
         }
       },
+      boxShadow: {
+        'glass': '0 20px 40px -10px rgba(100, 150, 255, 0.15), 0 10px 20px -5px rgba(150, 100, 255, 0.1)',
+        'glass-dark': '0 20px 40px -10px rgba(50, 20, 100, 0.4), 0 10px 20px -5px rgba(20, 50, 100, 0.3)',
+      }
     },
   },
   plugins: [],

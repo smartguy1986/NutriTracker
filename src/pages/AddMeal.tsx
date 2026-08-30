@@ -5,327 +5,304 @@ import { useNutrition } from '../context/NutritionContext';
 import { useFoodDatabase, FoodItem } from '../context/FoodDatabaseContext';
 
 export function AddMeal() {
-  const navigate = useNavigate();
-  const { addMeal } = useNutrition();
-  const { searchFood, loading } = useFoodDatabase();
+ const navigate = useNavigate();
+ const { addMeal } = useNutrition();
+ const { searchFood, loading } = useFoodDatabase();
 
-  const [step, setStep] = useState<"food" | "quantity">("food");
-  const [search, setSearch] = useState("");
-  const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  
-  // Weight in grams
-  const [weight, setWeight] = useState(100);
-  const [quantity, setQuantity] = useState(1);
-  const [showConfirm, setShowConfirm] = useState(false);
+ const [step, setStep] = useState<"food" | "quantity">("food");
+ const [search, setSearch] = useState("");
+ const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
+ const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+ 
+ // Weight in grams
+ const [weight, setWeight] = useState(100);
+ const [quantity, setQuantity] = useState(1);
+ const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    if (search.trim().length < 2) {
-      setSearchResults([]);
-      return;
-    }
-    
-    let active = true;
-    const fetchResults = async () => {
-      const results = await searchFood(search);
-      if (active) {
-        setSearchResults(results);
-      }
-    };
-    
-    const timeoutId = setTimeout(fetchResults, 300);
-    return () => {
-      active = false;
-      clearTimeout(timeoutId);
-    };
-  }, [search, searchFood]);
+ const now = new Date();
+ const defaultDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+ const defaultTime = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+ 
+ const [logDate, setLogDate] = useState(defaultDate);
+ const [logTime, setLogTime] = useState(defaultTime);
 
-  const handleConfirm = () => {
-    if (!selectedFood) return;
-    
-    const actualWeight = selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight;
-    const factor = actualWeight / 100;
-    
-    addMeal({
-      id: crypto.randomUUID(),
-      foodId: selectedFood.id,
-      foodName: selectedFood.name,
-      quantity: selectedFood.piece_weight ? quantity : weight,
-      unit: (selectedFood.piece_weight ? (selectedFood.piece_unit || 'pieces') : 'grams') as any,
-      calories: Math.round(selectedFood.calories * factor),
-      protein: Math.round(selectedFood.protein * factor),
-      carbs: Math.round(selectedFood.carbs * factor),
-      fat: Math.round(selectedFood.fat * factor),
-      timestamp: new Date().toISOString(),
-    });
-    
-    setShowConfirm(false);
-    navigate('/');
-  };
+ useEffect(() => {
+ if (search.trim().length < 2) {
+ setSearchResults([]);
+ return;
+ }
+ 
+ let active = true;
+ const fetchResults = async () => {
+ const results = await searchFood(search);
+ if (active) {
+ setSearchResults(results);
+ }
+ };
+ 
+ const timeoutId = setTimeout(fetchResults, 300);
+ return () => {
+ active = false;
+ clearTimeout(timeoutId);
+ };
+ }, [search, searchFood]);
 
-  return (
-    <div className="font-sans pb-32 min-h-screen bg-brand-bg text-brand-text">
-      <div style={{ padding: "52px 20px 20px", background: "#0f1320" }} className="max-w-md mx-auto">
-        <div className="flex items-center gap-4 mb-4">
-            {step === "food" ? (
-                <button onClick={() => navigate('/')} className="text-brand-gray">
-                    <ChevronLeftIcon className="w-6 h-6" />
-                </button>
-            ) : null}
-            <h2 style={{ color: "#f0f2f5", fontSize: 22, fontWeight: 800 }}>Log Food</h2>
-        </div>
-        <p style={{ color: "#6b7585", fontSize: 13 }}>
-          {step === "food" ? `Search for a food item` : `Set weight for ${selectedFood?.name}`}
-        </p>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          {["food", "quantity"].map((s, i) => (
-            <div key={s} style={{
-              height: 3, borderRadius: 4, flex: 1,
-              background: ["food", "quantity"].indexOf(step) >= i ? "#4ade80" : "#1e2230",
-              transition: "background 0.3s",
-            }} />
-          ))}
-        </div>
-      </div>
+ const handleConfirm = () => {
+ if (!selectedFood) return;
+ 
+ const actualWeight = selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight;
+ const factor = actualWeight / 100;
+ const timestamp = new Date(`${logDate}T${logTime}:00`).toISOString();
+ 
+ addMeal({
+ id: crypto.randomUUID(),
+ foodId: selectedFood.id,
+ foodName: selectedFood.name,
+ quantity: selectedFood.piece_weight ? quantity : weight,
+ unit: (selectedFood.piece_weight ? (selectedFood.piece_unit || 'pieces') : 'grams') as any,
+ calories: Math.round(selectedFood.calories * factor),
+ protein: Math.round(selectedFood.protein * factor),
+ carbs: Math.round(selectedFood.carbs * factor),
+ fat: Math.round(selectedFood.fat * factor),
+ timestamp: timestamp,
+ });
+ 
+ setShowConfirm(false);
+ navigate('/');
+ };
 
-      <div style={{ padding: "20px" }} className="max-w-md mx-auto">
-        {step === "food" && (
-          <div>
-            <div style={{ position: "relative" }}>
-              <MagnifyingGlassIcon className="w-5 h-5 text-brand-gray absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search database..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                style={{
-                  width: "100%", padding: "16px 16px 16px 44px", borderRadius: 14,
-                  background: "#161921", border: "1px solid #1e2230", color: "white", outline: "none",
-                  fontSize: 15
-                }}
-              />
-            </div>
+ return (
+ <div className="font-sans pb-32 min-h-screen text-brand-text transition-colors duration-300">
+ <div className="max-w-md mx-auto pt-12 px-5 pb-5 glass-card border-b border-brand-border/10 rounded-b-3xl">
+ <div className="flex items-center gap-4 mb-4">
+ {step === "food" ? (
+ <button onClick={() => navigate('/')} className="text-brand-textMuted hover:text-brand-text transition-colors">
+ <ChevronLeftIcon className="w-6 h-6" />
+ </button>
+ ) : null}
+ <h2 className="text-brand-text text-2xl font-extrabold">Log Food</h2>
+ </div>
+ <p className="text-brand-textMuted text-sm">
+ {step === "food" ? `Search for a food item` : `Set amount for ${selectedFood?.name}`}
+ </p>
+ <div className="flex gap-2 mt-4">
+ {["food", "quantity"].map((s, i) => (
+ <div key={s} className={`h-1.5 rounded-full flex-1 transition-colors duration-300 ${["food", "quantity"].indexOf(step) >= i ? 'bg-brand-accent' : 'bg-brand-surfaceLight'}`} />
+ ))}
+ </div>
+ </div>
 
-            <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 12 }}>
-              {loading ? (
-                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>Loading database...</p>
-              ) : search.length > 0 && search.length < 2 ? (
-                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>Type at least 2 characters...</p>
-              ) : searchResults.length === 0 && search.length >= 2 ? (
-                <p style={{ color: "#6b7585", textAlign: "center", marginTop: 20 }}>No foods found.</p>
-              ) : (
-                searchResults.map(food => (
-                <button
-                  key={food.id}
-                  onClick={() => { setSelectedFood(food); setStep("quantity"); }}
-                  style={{
-                    background: "#161921", borderRadius: 14, padding: "14px 16px",
-                    display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left", width: "100%",
-                  }}
-                >
-                  <div style={{ minWidth: 40, width: 40, height: 40, borderRadius: 12, background: "rgba(74,222,128,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>
-                    🥗
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: "#f0f2f5", fontWeight: 600, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{food.name}</p>
-                    <p style={{ color: "#6b7585", fontSize: 11 }} className="font-mono">P: {Math.round(food.protein)}g · C: {Math.round(food.carbs)}g · F: {Math.round(food.fat)}g</p>
-                  </div>
-                  <div style={{ textAlign: "right", minWidth: 60 }}>
-                    <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 15 }} className="font-mono">{Math.round(food.calories)}</p>
-                    <p style={{ color: "#6b7585", fontSize: 10 }}>per 100g</p>
-                  </div>
-                </button>
-              )))}
-            </div>
-          </div>
-        )}
+ <div className="max-w-md mx-auto p-5">
+ {step === "food" && (
+ <div>
+ <div className="relative">
+ <MagnifyingGlassIcon className="w-5 h-5 text-brand-textMuted absolute left-4 top-1/2 -translate-y-1/2" />
+ <input
+ type="text"
+ placeholder="Search database..."
+ value={search}
+ onChange={(e) => setSearch(e.target.value)}
+ className="w-full py-4 pl-12 pr-4 rounded-2xl glass-card border border-brand-border/20 text-brand-text text-[15px] outline-none focus:ring-2 focus:ring-brand-accent/50 focus:border-brand-accent transition-all "
+ />
+ </div>
 
-        {step === "quantity" && selectedFood && (
-          <div>
-            <button onClick={() => setStep("food")} style={{ display: "flex", alignItems: "center", gap: 6, color: "#6b7585", background: "none", border: "none", cursor: "pointer", marginBottom: 20 }}>
-              <ChevronLeftIcon className="w-4 h-4" /> Back
-            </button>
+ <div className="mt-6 flex flex-col gap-3">
+ {loading ? (
+ <p className="text-brand-textMuted text-center mt-5 text-sm">Loading database...</p>
+ ) : search.length > 0 && search.length < 2 ? (
+ <p className="text-brand-textMuted text-center mt-5 text-sm">Type at least 2 characters...</p>
+ ) : searchResults.length === 0 && search.length >= 2 ? (
+ <p className="text-brand-textMuted text-center mt-5 text-sm">No foods found.</p>
+ ) : (
+ searchResults.map(food => (
+ <button
+ key={food.id}
+ onClick={() => { setSelectedFood(food); setStep("quantity"); }}
+ className="glass-card rounded-2xl p-4 flex items-center gap-4 border border-brand-border/10 cursor-pointer text-left w-full hover:border-brand-accent/30 transition-colors "
+ >
+ <div className="min-w-[44px] w-11 h-11 rounded-xl bg-brand-accent/10 flex items-center justify-center text-[22px]">
+ 🥗
+ </div>
+ <div className="flex-1 min-w-0">
+ <p className="text-brand-text font-bold text-[15px] whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">{food.name}</p>
+ <p className="text-brand-textMuted text-xs font-mono">P: {Math.round(food.protein)}g · C: {Math.round(food.carbs)}g · F: {Math.round(food.fat)}g</p>
+ </div>
+ <div className="text-right min-w-[60px]">
+ <p className="text-brand-accent font-extrabold text-[17px] font-mono leading-none">{Math.round(food.calories)}</p>
+ <p className="text-brand-textMuted text-[10px] mt-1">per 100g</p>
+ </div>
+ </button>
+ )))}
+ </div>
+ </div>
+ )}
 
-            <div style={{ background: "#161921", borderRadius: 20, padding: 24, marginBottom: 24 }}>
-              <p style={{ color: "#4ade80", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Log Item</p>
-              <h3 style={{ color: "#f0f2f5", fontSize: 22, fontWeight: 800, marginBottom: 4 }}>{selectedFood.name}</h3>
-              
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 20 }}>
-                {[
-                  { label: "Calories", value: Math.round(selectedFood.calories * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), color: "#4ade80", unit: "kcal" },
-                  { label: "Protein", value: Math.round(selectedFood.protein * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), color: "#60a5fa", unit: "g" },
-                  { label: "Carbs", value: Math.round(selectedFood.carbs * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), color: "#fb923c", unit: "g" },
-                  { label: "Fat", value: Math.round(selectedFood.fat * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), color: "#f472b6", unit: "g" },
-                ].map((n) => (
-                  <div key={n.label} style={{ textAlign: "center" }}>
-                    <p style={{ color: n.color, fontSize: 18, fontWeight: 800 }} className="font-mono">{n.value}<span style={{ fontSize: 10, fontFamily: "Plus Jakarta Sans" }}>{n.unit}</span></p>
-                    <p style={{ color: "#6b7585", fontSize: 10 }}>{n.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+ {step === "quantity" && selectedFood && (
+ <div>
+ <button onClick={() => setStep("food")} className="flex items-center gap-1.5 text-brand-textMuted bg-transparent border-none cursor-pointer mb-5 hover:text-brand-text transition-colors">
+ <ChevronLeftIcon className="w-4 h-4" /> Back
+ </button>
 
-            {selectedFood.piece_weight ? (
-              <div style={{ background: "#161921", borderRadius: 20, padding: 24, marginBottom: 24 }}>
-                <p style={{ color: "#f0f2f5", fontWeight: 700, marginBottom: 16 }}>Quantity ({selectedFood.piece_unit || 'pieces'})</p>
-                
-                <div style={{ display: "flex", alignItems: "center", background: "#1e2230", borderRadius: 14, padding: "0 16px" }}>
-                  <input
-                    type="number"
-                    value={quantity || ''}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                    style={{
-                      flex: 1, background: "none", border: "none", outline: "none",
-                      color: "#f0f2f5", fontSize: 24, padding: "16px 0", textAlign: "center",
-                      fontWeight: 800
-                    }}
-                    className="font-mono"
-                  />
-                  <span style={{ color: "#6b7585", fontSize: 16, fontWeight: 700 }}>qty</span>
-                </div>
-                
-                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-                  {[1, 2, 3, 4, 5].map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => setQuantity(q)}
-                      style={{
-                        flex: 1, padding: "8px 0", borderRadius: 8,
-                        background: quantity === q ? "rgba(74,222,128,0.15)" : "#1e2230",
-                        color: quantity === q ? "#4ade80" : "#6b7585",
-                        border: quantity === q ? "1px solid #4ade80" : "1px solid transparent",
-                        cursor: "pointer", fontSize: 13, fontWeight: 600
-                      }}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-                <p style={{ color: "#6b7585", fontSize: 12, marginTop: 16, textAlign: "center" }}>
-                  (approx. {Math.round(quantity * selectedFood.piece_weight)}g total)
-                </p>
-              </div>
-            ) : (
-              <div style={{ background: "#161921", borderRadius: 20, padding: 24, marginBottom: 24 }}>
-                <p style={{ color: "#f0f2f5", fontWeight: 700, marginBottom: 16 }}>Weight (grams)</p>
-                
-                <div style={{ display: "flex", alignItems: "center", background: "#1e2230", borderRadius: 14, padding: "0 16px" }}>
-                  <input
-                    type="number"
-                    value={weight || ''}
-                    onChange={(e) => setWeight(parseInt(e.target.value) || 0)}
-                    style={{
-                      flex: 1, background: "none", border: "none", outline: "none",
-                      color: "#f0f2f5", fontSize: 24, padding: "16px 0", textAlign: "center",
-                      fontWeight: 800
-                    }}
-                    className="font-mono"
-                  />
-                  <span style={{ color: "#6b7585", fontSize: 16, fontWeight: 700 }}>g</span>
-                </div>
-                
-                <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-                  {[50, 100, 150, 200, 250].map((w) => (
-                    <button
-                      key={w}
-                      onClick={() => setWeight(w)}
-                      style={{
-                        flex: 1, padding: "8px 0", borderRadius: 8,
-                        background: weight === w ? "rgba(74,222,128,0.15)" : "#1e2230",
-                        color: weight === w ? "#4ade80" : "#6b7585",
-                        border: weight === w ? "1px solid #4ade80" : "1px solid transparent",
-                        cursor: "pointer", fontSize: 13, fontWeight: 600
-                      }}
-                    >
-                      {w}g
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+ <div className="glass-card rounded-[24px] p-6 mb-6 border border-brand-border/10">
+ <p className="text-brand-accent text-xs font-bold uppercase tracking-widest mb-2">Log Item</p>
+ <h3 className="text-brand-text text-2xl font-extrabold mb-1">{selectedFood.name}</h3>
+ 
+ <div className="grid grid-cols-4 gap-3 mt-6">
+ {[
+ { label: "Calories", value: Math.round(selectedFood.calories * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), colorClass: "text-brand-accent", unit: "kcal" },
+ { label: "Protein", value: Math.round(selectedFood.protein * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), colorClass: "text-blue-500", unit: "g" },
+ { label: "Carbs", value: Math.round(selectedFood.carbs * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), colorClass: "text-orange-500", unit: "g" },
+ { label: "Fat", value: Math.round(selectedFood.fat * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), colorClass: "text-pink-500", unit: "g" },
+ ].map((n) => (
+ <div key={n.label} className="text-center bg-brand-surfaceLight rounded-xl p-2 border border-brand-border/10">
+ <p className={`${n.colorClass} text-lg font-extrabold font-mono leading-tight`}>{n.value}<span className="text-[10px] font-sans font-medium">{n.unit}</span></p>
+ <p className="text-brand-textMuted text-[10px] mt-1">{n.label}</p>
+ </div>
+ ))}
+ </div>
+ </div>
 
-            <button
-              onClick={() => setShowConfirm(true)}
-              style={{
-                width: "100%", padding: 16, borderRadius: 14, background: "#4ade80",
-                color: "#0d1a0f", fontWeight: 700, fontSize: 16, border: "none", cursor: "pointer",
-              }}
-            >
-              Log food →
-            </button>
-          </div>
-        )}
-      </div>
+ {selectedFood.piece_weight ? (
+ <div className="glass-card rounded-[24px] p-6 mb-6 border border-brand-border/10">
+ <p className="text-brand-text font-bold mb-4">Quantity ({selectedFood.piece_unit || 'pieces'})</p>
+ 
+ <div className="flex items-center bg-brand-surfaceLight rounded-2xl px-5 border border-brand-border/10 focus-within:border-brand-accent/50 focus-within:ring-1 focus-within:ring-brand-accent/50 transition-all">
+ <input
+ type="number"
+ value={quantity || ''}
+ onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+ className="flex-1 bg-transparent border-none outline-none text-brand-text text-3xl py-4 text-center font-extrabold font-mono"
+ />
+ <span className="text-brand-textMuted text-base font-bold">qty</span>
+ </div>
+ 
+ <div className="flex gap-2 mt-4">
+ {[1, 2, 3, 4, 5].map((q) => (
+ <button
+ key={q}
+ onClick={() => setQuantity(q)}
+ className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-colors ${quantity === q ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20' : 'bg-brand-surfaceLight text-brand-textMuted hover:bg-brand-border/20'}`}
+ >
+ {q}
+ </button>
+ ))}
+ </div>
+ <p className="text-brand-textMuted text-xs mt-5 text-center font-medium">
+ (approx. {Math.round(quantity * selectedFood.piece_weight)}g total)
+ </p>
+ </div>
+ ) : (
+ <div className="glass-card rounded-[24px] p-6 mb-6 border border-brand-border/10">
+ <p className="text-brand-text font-bold mb-4">Weight (grams)</p>
+ 
+ <div className="flex items-center bg-brand-surfaceLight rounded-2xl px-5 border border-brand-border/10 focus-within:border-brand-accent/50 focus-within:ring-1 focus-within:ring-brand-accent/50 transition-all">
+ <input
+ type="number"
+ value={weight || ''}
+ onChange={(e) => setWeight(parseInt(e.target.value) || 0)}
+ className="flex-1 bg-transparent border-none outline-none text-brand-text text-3xl py-4 text-center font-extrabold font-mono"
+ />
+ <span className="text-brand-textMuted text-base font-bold">g</span>
+ </div>
+ 
+ <div className="flex flex-wrap gap-2 mt-4">
+ {[50, 100, 150, 200, 250].map((w) => (
+ <button
+ key={w}
+ onClick={() => setWeight(w)}
+ className={`flex-[1_0_30%] py-2.5 rounded-xl text-sm font-bold transition-colors ${weight === w ? 'bg-brand-accent text-white shadow-md shadow-brand-accent/20' : 'bg-brand-surfaceLight text-brand-textMuted hover:bg-brand-border/20'}`}
+ >
+ {w}g
+ </button>
+ ))}
+ </div>
+ </div>
+ )}
 
-      {/* Confirmation Modal */}
-      {showConfirm && selectedFood && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 200,
-          display: "flex", alignItems: "flex-end", justifyContent: "center",
-          backdropFilter: "blur(4px)",
-        }}>
-          <div style={{
-            width: "100%", maxWidth: 480, background: "#1e2230",
-            borderRadius: "24px 24px 0 0", padding: "32px 24px 48px",
-          }}>
-            <div style={{ width: 40, height: 4, background: "#2e3548", borderRadius: 4, margin: "0 auto 24px" }} />
-            <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <div style={{ width: 64, height: 64, borderRadius: 20, background: "rgba(74,222,128,0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-                <CheckIcon className="w-8 h-8 text-brand-green stroke-[3px]" />
-              </div>
-              <h3 style={{ color: "#f0f2f5", fontSize: 20, fontWeight: 800, marginBottom: 8 }}>Confirm Food Log</h3>
-              <p style={{ color: "#6b7585", fontSize: 14 }}>Adding to your daily timeline</p>
-            </div>
+ <div className="glass-card rounded-[24px] p-6 mb-6 border border-brand-border/10">
+ <p className="text-brand-text font-bold mb-4">Date & Time</p>
+ <div className="flex gap-3">
+ <input
+ type="date"
+ value={logDate}
+ onChange={(e) => setLogDate(e.target.value)}
+ className="flex-1 bg-brand-surfaceLight border border-brand-border/10 rounded-2xl px-4 py-3 text-brand-text text-sm font-medium outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all"
+ />
+ <input
+ type="time"
+ value={logTime}
+ onChange={(e) => setLogTime(e.target.value)}
+ className="w-[120px] bg-brand-surfaceLight border border-brand-border/10 rounded-2xl px-4 py-3 text-brand-text text-sm font-medium outline-none focus:border-brand-accent/50 focus:ring-1 focus:ring-brand-accent/50 transition-all"
+ />
+ </div>
+ </div>
 
-            <div style={{ background: "#161921", borderRadius: 16, padding: 20, marginBottom: 24 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                <div>
-                  <p style={{ color: "#f0f2f5", fontWeight: 700, fontSize: 16 }}>{selectedFood.name}</p>
-                  <p style={{ color: "#6b7585", fontSize: 13 }}>
-                    {selectedFood.piece_weight ? `${quantity} ${selectedFood.piece_unit || 'qty'}` : `${weight}g`}
-                  </p>
-                </div>
-                <p style={{ color: "#4ade80", fontWeight: 800, fontSize: 22 }} className="font-mono">
-                  {Math.round(selectedFood.calories * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100))} <span style={{ fontSize: 12, color: "#6b7585", fontFamily: "Plus Jakarta Sans", fontWeight: 400 }}>kcal</span>
-                </p>
-              </div>
-              <div style={{ display: "flex", gap: 16 }}>
-                {[
-                  { l: "Protein", v: Math.round(selectedFood.protein * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "#60a5fa" },
-                  { l: "Carbs", v: Math.round(selectedFood.carbs * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "#fb923c" },
-                  { l: "Fat", v: Math.round(selectedFood.fat * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "#f472b6" },
-                ].map((n) => (
-                  <div key={n.l} style={{ flex: 1, textAlign: "center", background: "#1e2230", borderRadius: 10, padding: "8px 4px" }}>
-                    <p style={{ color: n.c, fontWeight: 700, fontSize: 14 }} className="font-mono">{n.v}g</p>
-                    <p style={{ color: "#6b7585", fontSize: 10 }}>{n.l}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+ <button
+ onClick={() => setShowConfirm(true)}
+ className="w-full py-4 rounded-2xl bg-brand-accent text-white font-extrabold text-[17px] border-none cursor-pointer shadow-lg shadow-brand-accent/25 hover:bg-brand-accentHover transition-colors"
+ >
+ Log food →
+ </button>
+ </div>
+ )}
+ </div>
 
-            <div style={{ display: "flex", gap: 12 }}>
-              <button
-                onClick={() => setShowConfirm(false)}
-                style={{
-                  flex: 1, padding: 16, borderRadius: 14, background: "#1a1e28", border: "none",
-                  color: "#6b7585", fontWeight: 700, fontSize: 15, cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                style={{
-                  flex: 2, padding: 16, borderRadius: 14, background: "#4ade80", border: "none",
-                  color: "#0d1a0f", fontWeight: 700, fontSize: 15, cursor: "pointer",
-                }}
-              >
-                ✓ Confirm & Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+ {/* Confirmation Modal */}
+ {showConfirm && selectedFood && (
+ <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center backdrop-blur-sm">
+ <div className="w-full max-w-md glass-card rounded-t-[32px] pt-8 px-6 pb-12 shadow-2xl border-t border-brand-border/10 animate-[slideUp_0.3s_ease-out]">
+ <div className="w-12 h-1.5 bg-brand-surfaceLight rounded-full mx-auto mb-8" />
+ <div className="text-center mb-8">
+ <div className="w-16 h-16 rounded-[20px] bg-brand-accent/10 flex items-center justify-center mx-auto mb-5">
+ <CheckIcon className="w-8 h-8 text-brand-accent stroke-[3px]" />
+ </div>
+ <h3 className="text-brand-text text-[22px] font-extrabold mb-2">Confirm Food Log</h3>
+ <p className="text-brand-textMuted text-sm font-medium">Adding to your daily timeline</p>
+ </div>
+
+ <div className=" rounded-[24px] p-5 mb-8 border border-brand-border/10">
+ <div className="flex justify-between items-center mb-4">
+ <div>
+ <p className="text-brand-text font-bold text-[17px] mb-0.5">{selectedFood.name}</p>
+ <p className="text-brand-textMuted text-sm font-medium">
+ {selectedFood.piece_weight ? `${quantity} ${selectedFood.piece_unit || 'qty'}` : `${weight}g`}
+ </p>
+ </div>
+ <p className="text-brand-accent font-extrabold text-2xl font-mono">
+ {Math.round(selectedFood.calories * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100))} <span className="text-xs text-brand-textMuted font-sans font-medium">kcal</span>
+ </p>
+ </div>
+ <div className="flex gap-3">
+ {[
+ { l: "Protein", v: Math.round(selectedFood.protein * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "text-blue-500" },
+ { l: "Carbs", v: Math.round(selectedFood.carbs * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "text-orange-500" },
+ { l: "Fat", v: Math.round(selectedFood.fat * ((selectedFood.piece_weight ? quantity * selectedFood.piece_weight : weight) / 100)), c: "text-pink-500" },
+ ].map((n) => (
+ <div key={n.l} className="flex-1 text-center glass-card rounded-xl py-2.5 border border-brand-border/10">
+ <p className={`${n.c} font-extrabold text-[15px] font-mono leading-tight`}>{n.v}g</p>
+ <p className="text-brand-textMuted text-[10px] mt-0.5">{n.l}</p>
+ </div>
+ ))}
+ </div>
+ </div>
+
+ <div className="flex gap-3">
+ <button
+ onClick={() => setShowConfirm(false)}
+ className="flex-1 py-4 rounded-2xl bg-brand-surfaceLight border border-brand-border/20 text-brand-textMuted font-bold text-[15px] cursor-pointer hover:bg-brand-border/30 transition-colors"
+ >
+ Cancel
+ </button>
+ <button
+ onClick={handleConfirm}
+ className="flex-[2_2_0%] py-4 rounded-2xl bg-brand-accent text-white font-extrabold text-[15px] cursor-pointer shadow-lg shadow-brand-accent/25 hover:bg-brand-accentHover transition-colors"
+ >
+ ✓ Confirm & Add
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
+ </div>
+ );
 }

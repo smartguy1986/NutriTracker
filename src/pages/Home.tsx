@@ -80,7 +80,9 @@ export function Home() {
  />
  <div className="flex-1">
  <div className="mb-4">
- <p className="text-brand-textMuted text-xs uppercase tracking-widest mb-1 font-semibold">Remaining</p>
+ <p className={`text-xs uppercase tracking-widest mb-1 font-semibold ${remaining >= 0 ? 'text-brand-textMuted' : 'text-red-500/80'}`}>
+   {remaining >= 0 ? "Remaining" : "Excess"}
+ </p>
  <p className={`font-mono text-3xl font-extrabold ${remaining >= 0 ? 'text-brand-accent' : 'text-red-500'}`}>
  {Math.abs(Math.round(remaining))} <span className="text-sm font-sans font-medium text-brand-textMuted">kcal</span>
  </p>
@@ -104,24 +106,33 @@ export function Home() {
  {/* Macro cards */}
  <p className="text-brand-textMuted text-xs uppercase tracking-widest font-semibold mb-3 mt-2">Macronutrients</p>
  <div className="grid grid-cols-3 gap-3 mb-6">
- {macros.map((m) => (
- <div key={m.label} className="glass-card rounded-2xl p-4 border border-brand-border/10">
- <div className="flex items-center gap-2 mb-2">
- <div className={`w-2 h-2 rounded-full ${m.bgClass}`} />
- <span className="text-xs text-brand-textMuted font-semibold">{m.label}</span>
- </div>
- <p className="font-mono text-xl font-extrabold text-brand-text mb-1">
- {Math.round(m.value)}<span className="font-sans text-xs font-medium text-brand-textMuted ml-0.5">{m.unit}</span>
- </p>
- <div className="bg-brand-surfaceLight rounded-full h-1.5 overflow-hidden">
- <div 
- className={`h-full rounded-full transition-all duration-700 ${m.bgClass}`} 
- style={{ width: `${Math.min(m.value / m.goal, 1) * 100}%` }} 
- />
- </div>
- <p className="font-mono text-[10px] text-brand-textMuted mt-1.5">{m.goal}{m.unit} <span className="font-sans">goal</span></p>
- </div>
- ))}
+  {macros.map((m) => {
+    const isExcess = m.value > m.goal;
+    const diff = Math.abs(m.value - m.goal);
+    return (
+      <div key={m.label} className="glass-card rounded-2xl p-4 border border-brand-border/10">
+        <div className="flex items-center gap-2 mb-2">
+          <div className={`w-2 h-2 rounded-full ${isExcess ? 'bg-red-500' : m.bgClass}`} />
+          <span className="text-xs text-brand-textMuted font-semibold">{m.label}</span>
+        </div>
+        <p className="font-mono text-xl font-extrabold text-brand-text mb-1">
+          {Math.round(m.value)}<span className="font-sans text-xs font-medium text-brand-textMuted ml-0.5">{m.unit}</span>
+        </p>
+        <div className="bg-brand-surfaceLight rounded-full h-1.5 overflow-hidden">
+          <div 
+            className={`h-full rounded-full transition-all duration-700 ${isExcess ? 'bg-red-500' : m.bgClass}`} 
+            style={{ width: `${Math.min(m.value / m.goal, 1) * 100}%` }} 
+          />
+        </div>
+        <div className="flex justify-between items-center mt-1.5">
+          <p className="font-mono text-[10px] text-brand-textMuted">{m.goal}{m.unit} <span className="font-sans">goal</span></p>
+          {isExcess && (
+            <p className="font-mono text-[10px] text-red-500">+{Math.round(diff)}{m.unit} <span className="font-sans">excess</span></p>
+          )}
+        </div>
+      </div>
+    );
+  })}
  </div>
 
  {/* Quick stats */}

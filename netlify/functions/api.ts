@@ -102,11 +102,13 @@ export default async (req: Request, context: Context) => {
         const body = await req.json();
         if (!body.id) return new Response("Missing id", { status: 400 });
         
-        const { id, created_at, ...updateData } = body;
-        
         const updatedGoal = await db.update(user_goals)
-          .set(updateData)
-          .where(eq(user_goals.id, id))
+          .set({
+            protein_goal: body.protein_goal?.toString(),
+            water_goal: body.water_goal?.toString(),
+            streak_goal: body.streak_goal
+          })
+          .where(eq(user_goals.id, body.id))
           .returning();
         return new Response(JSON.stringify(updatedGoal[0]), {
           headers: { "Content-Type": "application/json" },
@@ -132,11 +134,12 @@ export default async (req: Request, context: Context) => {
         const body = await req.json();
         if (!body.id) return new Response("Missing id", { status: 400 });
         
-        const { id, created_at, ...updateData } = body;
-        
         const updatedActivity = await db.update(user_activity)
-          .set(updateData)
-          .where(eq(user_activity.id, id))
+          .set({
+            water_ml: body.water_ml?.toString(),
+            calories_burned: body.calories_burned?.toString()
+          })
+          .where(eq(user_activity.id, body.id))
           .returning();
         return new Response(JSON.stringify(updatedActivity[0]), {
           headers: { "Content-Type": "application/json" },

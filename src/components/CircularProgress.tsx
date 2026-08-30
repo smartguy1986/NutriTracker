@@ -38,8 +38,8 @@ export function CircularProgress({
  />
  </svg>
  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
- {label && <span style={{ fontSize: size * 0.16, fontWeight: 700, color: "#f0f2f5", lineHeight: 1 }} className="font-mono">{label}</span>}
- {sublabel && <span style={{ fontSize: size * 0.1, color: "#6b7585", marginTop: 2 }}>{sublabel}</span>}
+ {label && <span style={{ fontSize: size * 0.16, fontWeight: 700, lineHeight: 1 }} className="font-mono text-brand-text">{label}</span>}
+ {sublabel && <span style={{ fontSize: size * 0.1, marginTop: 2 }} className="text-brand-textMuted">{sublabel}</span>}
  </div>
  </div>
  );

@@ -3,9 +3,59 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-bg: 242 244 247; /* slightly darker/cooler light bg to make white glass pop */
+    --color-surface: 255 255 255; /* #ffffff */
+    --color-surface-light: 255 255 255; /* #ffffff */
+    --color-text: 17 24 39; /* #111827 */
+    --color-text-muted: 107 114 128; /* #6b7280 */
+    --color-gray: 156 163 175; /* #9ca3af */
+    --color-border: 229 231 235; /* #e5e7eb */
+    
+    /* Default Accent: Green */
+    --color-accent: 34 197 94; /* #22c55e */
+    --color-accent-hover: 22 163 74; /* #16a34a */
+  }
+
+  .dark {
+    --color-bg: 13 15 20; /* #0d0f14 */
+    --color-surface: 22 25 33; /* #161921 */
+    --color-surface-light: 30 34 48; /* #1e2230 */
+    --color-text: 240 242 245; /* #f0f2f5 */
+    --color-text-muted: 156 163 175; /* #9ca3af */
+    --color-gray: 107 117 133; /* #6b7585 */
+    --color-border: 255 255 255; /* Note: border needs alpha separately or specific rgb */
+  }
+  
+  .dark {
+    --color-border: 40 43 51; /* #282b33 equivalent to rgba(255,255,255,0.08) */
+  }
+
   body {
-    @apply bg-brand-bg text-brand-text antialiased;
+    @apply text-brand-text antialiased transition-colors duration-300;
+    background-color: rgb(var(--color-bg));
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /* True iOS / Pastel 3D Glass Effect */
+  .glass-card {
+    @apply bg-white/40 backdrop-blur-3xl backdrop-filter backdrop-saturate-[1.2] shadow-glass border border-white/50 dark:bg-[#1c1c1e]/60 dark:shadow-glass-dark dark:border-white/10 transition-all duration-300 relative overflow-hidden;
+  }
+  
+  /* Inner white highlight for thick acrylic look */
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 1px rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+  }
+  
+  .dark .glass-card::before {
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
   }
 }
 

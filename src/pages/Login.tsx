@@ -21,7 +21,7 @@ export function Login() {
  const initGoogle = () => {
  if (window.google?.accounts?.id) {
  window.google.accounts.id.initialize({
- client_id: "768377164273-mkdj4ml7rlc7dd40kss457kqlqp7emk0.apps.googleusercontent.com",
+ client_id: "768377164273-bipjs3v41ac9tkg6fmnt8lulpiesq9h6.apps.googleusercontent.com",
  callback: handleGoogleResponse
  });
 

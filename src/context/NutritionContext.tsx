@@ -252,8 +252,23 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: user.id, calorie_goal: newSettings.calorieGoal })
         });
+        
+        // Find existing user goals id to PUT
+        const userGoal = allGoals.find((g: any) => g.user_id === user.id);
+        if (userGoal) {
+          await fetch('/api/goals', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              id: userGoal.id, 
+              protein_goal: newSettings.proteinGoal,
+              carbs_goal: newSettings.carbsGoal,
+              fat_goal: newSettings.fatGoal
+            })
+          });
+        }
       } catch (err) {
-        console.error("Failed to sync calorie goal to database", err);
+        console.error("Failed to sync settings to database", err);
       }
     }
   };

@@ -108,6 +108,8 @@ export default async function handler(req: Request) {
         const updatedGoal = await db.update(user_goals)
           .set({
             protein_goal: body.protein_goal?.toString(),
+            carbs_goal: body.carbs_goal?.toString(),
+            fat_goal: body.fat_goal?.toString(),
             water_goal: body.water_goal?.toString(),
             streak_goal: body.streak_goal
           })

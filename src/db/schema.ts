@@ -55,6 +55,8 @@ export const user_goals = pgTable('user_goals', {
   id: uuid('id').primaryKey().defaultRandom(),
   user_id: uuid('user_id').references(() => profiles.id).notNull(),
   protein_goal: numeric('protein_goal').default('160').notNull(),
+  carbs_goal: numeric('carbs_goal').default('250').notNull(),
+  fat_goal: numeric('fat_goal').default('65').notNull(),
   water_goal: numeric('water_goal').default('4000').notNull(),
   streak_goal: integer('streak_goal').default(7).notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

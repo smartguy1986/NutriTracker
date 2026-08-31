@@ -3,6 +3,7 @@ import { CircularProgress } from '../components/CircularProgress';
 import { BottomNav } from '../components/BottomNav';
 import { useNutrition } from '../context/NutritionContext';
 import { useAuth } from '../context/AuthContext';
+import { getFoodEmoji } from '../utils/foodEmojis';
 import { useState } from 'react';
 
 export function Home() {
@@ -180,7 +181,7 @@ export function Home() {
  return (
  <div key={meal.id} className="flex gap-4 relative z-10">
  <div className="w-10 h-10 rounded-full glass-card border-[3px] border-brand-bg flex items-center justify-center shrink-0 ">
- <span className="text-base">🍔</span>
+ <span className="text-base">{getFoodEmoji(meal.foodName)}</span>
  </div>
  <div className="flex-1 glass-card rounded-2xl p-4 border border-brand-border/10 hover:border-brand-accent/30 transition-colors">
  <div className="flex justify-between items-start mb-1">

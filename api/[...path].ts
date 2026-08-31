@@ -1,10 +1,13 @@
-import { Context } from "@netlify/functions";
-import { db } from "../../src/db/index";
-import { meals, profiles, foods as foodsSchema, user_goals, user_activity } from "../../src/db/schema";
+import { db } from "../src/db/index";
+import { meals, profiles, foods as foodsSchema, user_goals, user_activity } from "../src/db/schema";
 import { eq, ilike } from "drizzle-orm";
-import foodsData from "../../src/data/foods.json";
+import foodsData from "../src/data/foods.json";
 
-export default async (req: Request, context: Context) => {
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req: Request) {
   const url = new URL(req.url);
   const path = url.pathname;
   
@@ -157,6 +160,4 @@ export default async (req: Request, context: Context) => {
   }
 };
 
-export const config = {
-  path: "/api/*"
-};
+

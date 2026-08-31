@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeftIcon, CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useNutrition } from '../context/NutritionContext';
 import { useFoodDatabase, FoodItem } from '../context/FoodDatabaseContext';
+import { getFoodEmoji } from '../utils/foodEmojis';
 
 export function AddMeal() {
  const navigate = useNavigate();
@@ -121,7 +122,7 @@ export function AddMeal() {
  className="glass-card rounded-2xl p-4 flex items-center gap-4 border border-brand-border/10 cursor-pointer text-left w-full hover:border-brand-accent/30 transition-colors "
  >
  <div className="min-w-[44px] w-11 h-11 rounded-xl bg-brand-accent/10 flex items-center justify-center text-[22px]">
- 🥗
+ {getFoodEmoji(food.name)}
  </div>
  <div className="flex-1 min-w-0">
  <p className="text-brand-text font-bold text-[15px] whitespace-nowrap overflow-hidden text-ellipsis mb-0.5">{food.name}</p>

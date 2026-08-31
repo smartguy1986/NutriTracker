@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { neon } = require('@neondatabase/serverless');
 const foodsData = require('../src/data/foods.json');
 

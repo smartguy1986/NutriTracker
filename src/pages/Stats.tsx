@@ -59,7 +59,7 @@ export function Stats() {
  contentStyle={{ background: "rgb(var(--color-surface))", border: "1px solid rgba(var(--color-border), 0.1)", borderRadius: 12, color: "rgb(var(--color-text))", fontSize: 13, fontWeight: 'bold' }}
  cursor={false}
  />
- <Bar dataKey="calories" fill="rgb(var(--color-accent))" radius={[8, 8, 0, 0]} background={{ fill: 'rgba(128, 128, 128, 0.1)', radius: [8, 8, 0, 0] }}>
+ <Bar dataKey="calories" fill="rgb(var(--color-accent))" radius={[8, 8, 0, 0]} background={{ fill: 'rgba(128, 128, 128, 0.1)', radius: 8 }}>
  {weeklyData.map((d, i) => (
  <Cell key={i} fill={d.day === "Sun" ? "rgb(var(--color-accent))" : "rgba(var(--color-accent), 0.2)"} />
  ))}

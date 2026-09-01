@@ -266,6 +266,17 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
               fat_goal: newSettings.fatGoal
             })
           });
+        } else {
+          await fetch('/api/goals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              user_id: user.id,
+              protein_goal: newSettings.proteinGoal,
+              carbs_goal: newSettings.carbsGoal,
+              fat_goal: newSettings.fatGoal
+            })
+          });
         }
       } catch (err) {
         console.error("Failed to sync settings to database", err);

@@ -1,18 +1,19 @@
+Markdown
 # ⚡ NutriTracker — Intelligent Calorie & Nutrition Engine
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://letstracknutri.netlify.app/)
-[![UI/UX](https://img.shields.io/badge/Design%20System-Antigravity%20HUD-ff007f?style=for-the-badge)](https://letstracknutri.netlify.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://food-calorie-track.vercel.app/)
+[![UI/UX](https://img.shields.io/badge/Design%20System-Antigravity%20HUD-ff007f?style=for-the-badge)](https://food-calorie-track.vercel.app/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-> **Live Application:** [https://letstracknutri.netlify.app/](https://letstracknutri.netlify.app/)  
-> A high-performance metabolic and nutritional tracking application featuring dynamic persona-based theming, one-tap authentication workflows, and a streamlined macro-management engine.
+> **Live Application:** [https://food-calorie-track.vercel.app/](https://food-calorie-track.vercel.app/)  
+> A high-performance metabolic and nutritional tracking web application featuring dynamic persona-based theming, seamless authentication workflows, and a streamlined macro-management engine.
 
 ---
 
 ## 🌐 Live Preview
 
 Experience the live web build directly:  
-👉 **[Launch NutriTracker on Netlify](https://letstracknutri.netlify.app/)**
+👉 **[Launch NutriTracker on Vercel](https://food-calorie-track.vercel.app/)**
 
 ---
 
@@ -49,7 +50,7 @@ Experience the live web build directly:
 ## 🛠️ Tech Stack & Architecture
 
 * **Frontend:** React / Modern Web Architecture
-* **Hosting & Deployment:** Netlify (Continuous Deployment via Git)
+* **Hosting & Deployment:** Vercel (Edge Network & CI/CD Pipeline)
 * **Design System:** Custom Antigravity HUD Engine (CSS Variables, Glassmorphism, Responsive Tokens)
 * **Auth Integration:** Google Identity Services / Truecaller SDK
 * **State Management:** React Context / Zustand
@@ -74,14 +75,14 @@ Experience the live web build directly:
 ├── Preset Quick Slots    ├── Dynamic Persona Themes
 ├── Ingredient Search     └── Particle & Glow Controls
 └── Portion Matrix
-
 🚀 Local Development Setup
 Prerequisites
 Node.js (>= 18.x)
 
-npm or yarn
+npm, pnpm, or yarn
 
 Installation & Run
+Bash
 # 1. Clone the repository
 git clone [https://github.com/smartguy1986/NutriTracker.git](https://github.com/smartguy1986/NutriTracker.git)
 
@@ -91,21 +92,13 @@ cd NutriTracker
 # 3. Install dependencies
 npm install
 
-# 4. Set up the Database (Neon Postgres)
-# Copy the example environment file
-cp .env.example .env
-# Edit .env and replace DATABASE_URL with your Neon Postgres connection string
-
-# 5. Push the schema to your database
-npm run db:push
-
-# 6. Start local development server
+# 4. Start local development server
 npm run dev
 
 👤 Author
 GitHub: @smartguy1986
 
-Live Demo: letstracknutri.netlify.app
+Live Demo: food-calorie-track.vercel.app
 
 📄 License
 This project is licensed under the MIT License — see the LICENSE file for details.

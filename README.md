@@ -91,7 +91,15 @@ cd NutriTracker
 # 3. Install dependencies
 npm install
 
-# 4. Start local development server
+# 4. Set up the Database (Neon Postgres)
+# Copy the example environment file
+cp .env.example .env
+# Edit .env and replace DATABASE_URL with your Neon Postgres connection string
+
+# 5. Push the schema to your database
+npm run db:push
+
+# 6. Start local development server
 npm run dev
 
 👤 Author

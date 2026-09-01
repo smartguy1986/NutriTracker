@@ -170,8 +170,8 @@ export function Profile() {
  <ResponsiveContainer width="100%" height={120}>
  <BarChart data={weeklyData} barSize={20}>
  <XAxis dataKey="day" tick={{ fill: "var(--color-text-muted)", fontSize: 10 }} axisLine={false} tickLine={false} />
- <Tooltip contentStyle={{ background: "rgb(var(--color-surface))", border: "1px solid rgba(var(--color-border),0.1)", borderRadius: 12, color: "rgb(var(--color-text))", fontSize: 12, fontWeight: 'bold' }} cursor={{fill: "rgba(var(--color-text-muted), 0.1)"}} />
- <Bar dataKey="calories" fill="rgb(var(--color-accent))" radius={[6, 6, 0, 0]} fillOpacity={0.85} />
+ <Tooltip contentStyle={{ background: "rgb(var(--color-surface))", border: "1px solid rgba(var(--color-border),0.1)", borderRadius: 12, color: "rgb(var(--color-text))", fontSize: 12, fontWeight: 'bold' }} cursor={false} />
+ <Bar dataKey="calories" fill="rgb(var(--color-accent))" radius={[6, 6, 0, 0]} fillOpacity={0.85} background={{ fill: 'rgba(128, 128, 128, 0.1)', radius: [6, 6, 0, 0] }} />
  </BarChart>
  </ResponsiveContainer>
  </div>

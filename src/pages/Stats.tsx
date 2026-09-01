@@ -12,6 +12,11 @@ export function Stats() {
   { name: "Fat", value: Math.round(dailyLog.totalFat), color: "#ec4899" },
   ];
 
+  const totalMacros = macroData.reduce((acc, curr) => acc + curr.value, 0);
+  const pieData = totalMacros === 0 
+    ? [{ name: "Empty", value: 1, color: "rgba(128, 128, 128, 0.15)" }] 
+    : macroData;
+
   const sortedMeals = dailyLog.meals;
 
   const dateObj = new Date(selectedDate + "T12:00:00");
@@ -72,8 +77,8 @@ export function Stats() {
  <div className="glass-card rounded-[24px] p-5 mb-6 border border-brand-border/10 flex items-center gap-6">
  <ResponsiveContainer width={120} height={120}>
  <PieChart>
- <Pie data={macroData} cx="50%" cy="50%" innerRadius={36} outerRadius={55} dataKey="value" strokeWidth={0}>
- {macroData.map((e, i) => <Cell key={i} fill={e.color} />)}
+ <Pie data={pieData} cx="50%" cy="50%" innerRadius={36} outerRadius={55} dataKey="value" strokeWidth={0}>
+ {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
  </Pie>
  </PieChart>
  </ResponsiveContainer>

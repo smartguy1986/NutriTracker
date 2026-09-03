@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { DailyLog, MealRecord, UserSettings } from '../types';
 import { useAuth } from './AuthContext';
-import { fetchMeals, createMeal, fetchActivity, createActivity, updateActivity, fetchGoals } from '../services/api';
+import { fetchMeals, createMeal, updateMeal, deleteMeal, fetchActivity, createActivity, updateActivity, fetchGoals } from '../services/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface Achievements {
@@ -23,6 +23,8 @@ interface NutritionContextType {
   achievements: Achievements;
   settings: UserSettings;
   addMeal: (meal: MealRecord) => void;
+  updateMeal: (id: string, updates: Partial<MealRecord>) => void;
+  deleteMeal: (id: string) => void;
   updateSettings: (settings: UserSettings) => void;
 }
 
@@ -241,6 +243,40 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
     addMealMutation.mutate(dbMealPayload as any);
   };
 
+  const updateMealMutation = useMutation({
+    mutationFn: (meal: any) => updateMeal(meal),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  });
+
+  const deleteMealMutation = useMutation({
+    mutationFn: (id: string) => deleteMeal(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  });
+
+  const updateMealContext = (id: string, updates: Partial<MealRecord>) => {
+    if (!user?.id) return;
+    const dbPayload: any = { id };
+    if (updates.quantity !== undefined) dbPayload.quantity = updates.quantity.toString();
+    if (updates.calories !== undefined) dbPayload.calories = updates.calories.toString();
+    if (updates.protein !== undefined) dbPayload.protein = updates.protein.toString();
+    if (updates.carbs !== undefined) dbPayload.carbs = updates.carbs.toString();
+    if (updates.fat !== undefined) dbPayload.fat = updates.fat.toString();
+    if (updates.timestamp !== undefined) {
+      dbPayload.created_at = updates.timestamp;
+      const mealDate = new Date(updates.timestamp);
+      dbPayload.logged_date = `${mealDate.getFullYear()}-${String(mealDate.getMonth() + 1).padStart(2, '0')}-${String(mealDate.getDate()).padStart(2, '0')}`;
+    }
+    updateMealMutation.mutate(dbPayload);
+  };
+
+  const deleteMealContext = (id: string) => {
+    deleteMealMutation.mutate(id);
+  };
+
   const updateSettings = async (newSettings: UserSettings) => {
     setSettings(newSettings);
     localStorage.setItem('user_settings', JSON.stringify(newSettings));
@@ -285,7 +321,23 @@ export function NutritionProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <NutritionContext.Provider value={{ dailyLog, selectedDateLog, selectedDate, setSelectedDate, weeklyData, todayWaterMl, todayCaloriesBurned, updateWater, updateCaloriesBurned, achievements, settings, addMeal, updateSettings }}>
+    <NutritionContext.Provider value={{
+        dailyLog,
+        selectedDateLog,
+        selectedDate,
+        setSelectedDate,
+        weeklyData,
+        todayWaterMl,
+        todayCaloriesBurned,
+        updateWater,
+        updateCaloriesBurned,
+        achievements,
+        settings,
+        addMeal,
+        updateMeal: updateMealContext,
+        deleteMeal: deleteMealContext,
+        updateSettings
+      }}>
       {children}
     </NutritionContext.Provider>
   );

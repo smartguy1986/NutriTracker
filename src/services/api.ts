@@ -22,6 +22,29 @@ export const createMeal = async (meal: Omit<MealRecord, 'id' | 'created_at'>): P
   return response.json();
 };
 
+export const updateMeal = async (meal: Partial<MealRecord> & { id: string }): Promise<MealRecord> => {
+  const response = await fetch('/api/meals', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(meal),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update meal');
+  }
+  return response.json();
+};
+
+export const deleteMeal = async (id: string): Promise<void> => {
+  const response = await fetch(`/api/meals?id=${id}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete meal');
+  }
+};
+
 export const fetchProfiles = async () => {
   const response = await fetch('/api/profiles');
   if (!response.ok) {

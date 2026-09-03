@@ -1,7 +1,8 @@
 import { BarChart, Bar, XAxis, Tooltip, Cell, ResponsiveContainer, PieChart, Pie } from 'recharts';
 import { useNutrition } from '../context/NutritionContext';
 import { BottomNav } from '../components/BottomNav';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 export function Stats() {
   const { selectedDateLog: dailyLog, selectedDate, setSelectedDate, weeklyData } = useNutrition();
@@ -107,9 +108,12 @@ export function Stats() {
   const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
  return (
- <div key={meal.id} className="glass-card rounded-[20px] p-4 flex items-center justify-between gap-4 border border-brand-border/10 hover:border-brand-accent/30 transition-colors">
+ <Link key={meal.id} to={`/edit-meal/${meal.id}`} className="glass-card rounded-[20px] p-4 flex items-center justify-between gap-4 border border-brand-border/10 hover:border-brand-accent/30 transition-colors cursor-pointer group">
  <div className="flex-1">
+ <div className="flex items-center gap-2">
  <p className="text-brand-text font-bold text-[15px]">{meal.foodName}</p>
+ <PencilIcon className="w-3.5 h-3.5 text-brand-textMuted opacity-0 group-hover:opacity-100 transition-opacity" />
+ </div>
  <p className="text-brand-textMuted text-xs font-medium mt-0.5">{dateStr}, {timeStr} · {meal.quantity} {meal.unit}</p>
  <div className="flex gap-3 mt-2">
  <span className="text-xs text-blue-500 font-extrabold font-mono">{Math.round(meal.protein)}g P</span>
@@ -123,7 +127,7 @@ export function Stats() {
  </p>
  <p className="text-brand-textMuted text-[11px] font-medium mt-1">kcal</p>
  </div>
- </div>
+ </Link>
  );
  })
  )}

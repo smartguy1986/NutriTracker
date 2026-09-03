@@ -55,6 +55,30 @@ export default async function handler(req: Request) {
           headers: { "Content-Type": "application/json" },
         });
       }
+      if (req.method === "PUT") {
+        const body = await req.json();
+        if (!body.id) return new Response("Missing id", { status: 400 });
+        const { id, ...updateData } = body;
+        if (updateData.created_at) updateData.created_at = new Date(updateData.created_at);
+        const updatedMeal = await db.update(meals)
+          .set(updateData)
+          .where(eq(meals.id, id))
+          .returning();
+        return new Response(JSON.stringify(updatedMeal[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      if (req.method === "DELETE") {
+        const url = new URL(req.url);
+        const id = url.searchParams.get("id");
+        if (!id) return new Response("Missing id", { status: 400 });
+        const deletedMeal = await db.delete(meals)
+          .where(eq(meals.id, id))
+          .returning();
+        return new Response(JSON.stringify(deletedMeal[0]), {
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     if (path.includes("/profiles")) {

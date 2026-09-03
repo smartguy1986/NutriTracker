@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { AddMeal } from './pages/AddMeal';
+import { EditMeal } from './pages/EditMeal';
 import { Stats } from './pages/Stats';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
@@ -44,6 +45,7 @@ function App() {
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
       <Route path="/add-meal" element={<ProtectedRoute><AddMeal /></ProtectedRoute>} />
+      <Route path="/edit-meal/:id" element={<ProtectedRoute><EditMeal /></ProtectedRoute>} />
       <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />

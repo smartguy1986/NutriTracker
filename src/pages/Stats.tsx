@@ -103,12 +103,14 @@ export function Stats() {
  </div>
  ) : (
  sortedMeals.map((meal) => {
- const timeStr = new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dateObj = new Date(meal.timestamp);
+  const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
  return (
  <div key={meal.id} className="glass-card rounded-[20px] p-4 flex items-center justify-between gap-4 border border-brand-border/10 hover:border-brand-accent/30 transition-colors">
  <div className="flex-1">
  <p className="text-brand-text font-bold text-[15px]">{meal.foodName}</p>
- <p className="text-brand-textMuted text-xs font-medium mt-0.5">{timeStr} · {meal.quantity} {meal.unit}</p>
+ <p className="text-brand-textMuted text-xs font-medium mt-0.5">{dateStr}, {timeStr} · {meal.quantity} {meal.unit}</p>
  <div className="flex gap-3 mt-2">
  <span className="text-xs text-blue-500 font-extrabold font-mono">{Math.round(meal.protein)}g P</span>
  <span className="text-xs text-orange-500 font-extrabold font-mono">{Math.round(meal.carbs)}g C</span>

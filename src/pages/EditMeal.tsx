@@ -34,7 +34,7 @@ export function EditMeal() {
     setLogDate(`${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`);
     setLogTime(String(dateObj.getHours()).padStart(2, '0') + ':' + String(dateObj.getMinutes()).padStart(2, '0'));
 
-    if (foundMeal.unit === 'grams' || foundMeal.unit === 'g') {
+    if (foundMeal.unit === 'grams') {
       setWeight(foundMeal.quantity);
     } else {
       setQuantity(foundMeal.quantity);
@@ -50,7 +50,7 @@ export function EditMeal() {
   if (!meal) return null;
 
   const handleUpdate = () => {
-    const isPiece = meal.unit !== 'grams' && meal.unit !== 'g';
+    const isPiece = meal.unit !== 'grams';
     const newQuantity = isPiece ? quantity : weight;
     
     let calories = meal.calories;
@@ -96,7 +96,7 @@ export function EditMeal() {
     }
   };
 
-  const isPiece = meal.unit !== 'grams' && meal.unit !== 'g';
+  const isPiece = meal.unit !== 'grams';
 
   return (
     <div className="font-sans pb-32 min-h-screen text-brand-text transition-colors duration-300">

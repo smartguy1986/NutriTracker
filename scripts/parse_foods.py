@@ -15,7 +15,7 @@ def read_xlsx(filename):
                     if el.tag.endswith('}t'):
                         shared_strings.append(el.text)
         except Exception as e:
-            print("Shared strings not found or error:", e)
+            pass
 
         with z.open('xl/worksheets/sheet1.xml') as f:
             tree = ET.parse(f)
@@ -40,7 +40,11 @@ def read_xlsx(filename):
                                 last_col = col_idx
                             
                             v = c.find('.//{*}v')
-                            if v is not None:
+                            t_inline = c.find('.//{*}is/{*}t')
+                            
+                            if t_inline is not None and t_inline.text is not None:
+                                r.append(t_inline.text)
+                            elif v is not None and v.text is not None:
                                 val = v.text
                                 if c.attrib.get('t') == 's':
                                     val = shared_strings[int(val)]
@@ -51,48 +55,54 @@ def read_xlsx(filename):
             return rows
 
 def parse_and_save():
-    rows = read_xlsx('food_plans.xlsx')
+    rows = read_xlsx('indian_food_nutrition.xlsx')
     
     foods = []
     # Skip header
     for r in rows[1:]:
-        if len(r) < 11:
+        if len(r) < 20: # Make sure we have at least up to energy_kcal (index 19)
             continue
             
         try:
-            name = str(r[2]).strip()
+            name = str(r[1]).strip()
             if not name:
                 continue
             
-            category = str(r[1]).strip() if len(r) > 1 else "Other"
+            category = str(r[2]).strip() if len(r) > 2 else "Other"
             
-            # If the name contains "(1 piece)", we can extract it
             piece_weight = None
             piece_unit = None
             
-            # Extract macros. Energy is in kJ in food_plans, convert to kcal
-            energy_kj = float(r[11]) if len(r) > 11 and r[11] else 0.0
-            carbs = float(r[10]) if len(r) > 10 and r[10] else 0.0
-            
-            # Heuristic for shifted columns (missing fibre cells)
-            if energy_kj == 0.0 and carbs > 100:
-                energy_kj = carbs
-                carbs = float(r[9]) if len(r) > 9 and r[9] else 0.0
-            
-            calories = energy_kj / 4.184
-            
-            protein = float(r[4]) if len(r) > 4 and r[4] else 0.0
-            fat = float(r[6]) if len(r) > 6 and r[6] else 0.0
+            try:
+                def_unit = str(r[6]).strip().lower()
+                def_grams = float(r[7]) if r[7] else None
+                
+                # If the default unit is something like '1 piece', '1 cup', extract it
+                if def_unit and def_grams and def_unit != '100 g' and def_unit != '100g':
+                    piece_unit = def_unit.replace('1 ', '')
+                    piece_weight = def_grams
+            except:
+                pass
 
-            if "(1 piece)" in name.lower() or "(piece)" in name.lower():
-                piece_weight = 100.0 # Setting to 100 means factor=1. So 1 piece = exactly the macros listed.
-                piece_unit = "piece"
-                name = re.sub(r'\(1 piece\)', '', name, flags=re.IGNORECASE).strip()
-                name = re.sub(r'\(piece\)', '', name, flags=re.IGNORECASE).strip()
-            elif "(1 cup)" in name.lower():
-                piece_weight = 100.0
-                piece_unit = "cup"
-                name = re.sub(r'\(1 cup\)', '', name, flags=re.IGNORECASE).strip()
+            try:
+                calories = float(r[19]) if r[19] else 0.0
+            except ValueError:
+                calories = 0.0
+
+            try:
+                protein = float(r[11]) if r[11] else 0.0
+            except ValueError:
+                protein = 0.0
+                
+            try:
+                fat = float(r[13]) if r[13] else 0.0
+            except ValueError:
+                fat = 0.0
+                
+            try:
+                carbs = float(r[17]) if r[17] else 0.0
+            except ValueError:
+                carbs = 0.0
 
             food_obj = {
                 "id": str(uuid.uuid4()),
@@ -111,6 +121,7 @@ def parse_and_save():
                 
             foods.append(food_obj)
         except Exception as e:
+            print("Failed to parse row:", r, "Error:", e)
             pass
             
     with open('src/data/foods.json', 'w') as f:

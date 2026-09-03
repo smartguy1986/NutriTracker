@@ -49,6 +49,7 @@ export default async function handler(req: Request) {
       }
       if (req.method === "POST") {
         const body = await req.json();
+        if (body.created_at) body.created_at = new Date(body.created_at);
         const newMeal = await db.insert(meals).values(body).returning();
         return new Response(JSON.stringify(newMeal[0]), {
           headers: { "Content-Type": "application/json" },
@@ -65,6 +66,7 @@ export default async function handler(req: Request) {
       }
       if (req.method === "POST") {
         const body = await req.json();
+        if (body.created_at) body.created_at = new Date(body.created_at);
         const newProfile = await db.insert(profiles).values(body).returning();
         return new Response(JSON.stringify(newProfile[0]), {
           headers: { "Content-Type": "application/json" },
@@ -96,6 +98,7 @@ export default async function handler(req: Request) {
       }
       if (req.method === "POST") {
         const body = await req.json();
+        if (body.created_at) body.created_at = new Date(body.created_at);
         const newGoal = await db.insert(user_goals).values(body).returning();
         return new Response(JSON.stringify(newGoal[0]), {
           headers: { "Content-Type": "application/json" },
@@ -130,6 +133,7 @@ export default async function handler(req: Request) {
       }
       if (req.method === "POST") {
         const body = await req.json();
+        if (body.created_at) body.created_at = new Date(body.created_at);
         const newActivity = await db.insert(user_activity).values(body).returning();
         return new Response(JSON.stringify(newActivity[0]), {
           headers: { "Content-Type": "application/json" },
